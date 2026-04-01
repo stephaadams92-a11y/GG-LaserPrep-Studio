@@ -1,0 +1,861 @@
+﻿<!DOCTYPE html>
+<!--
+  +==================================================================+
+  |           G&G LaserPrep Pro Studio                               |
+  |           &copy; 2026 Stephanie Adams. All Rights Reserved.           |
+  |                                                                  |
+  |  This software is the exclusive intellectual property of         |
+  |  Stephanie Adams. Unauthorised copying, redistribution,          |
+  |  publication, or claiming of this work as your own is strictly   |
+  |  prohibited. This tool was created by Stephanie Adams for        |
+  |  G&G LaserPrep, Stoke-on-Trent, UK.                             |
+  |                                                                  |
+  |  Sharing or republishing this application without express        |
+  |  written permission from the author is not permitted.            |
+  +==================================================================+
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="author" content="Stephanie Adams">
+    <meta name="copyright" content="&copy; 2026 Stephanie Adams. All Rights Reserved.">
+    <meta name="description" content="G&G LaserPrep Pro Studio &mdash; Image preparation tool for laser engraving. Created by Stephanie Adams.">
+    <meta property="og:title" content="G&G LaserPrep Pro Studio by Stephanie Adams">
+    <meta property="og:description" content="Professional laser engraving image preparation tool. &copy; 2026 Stephanie Adams.">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0d0d0d">
+    <title>G&amp;G LaserPrep Pro Studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="LaserPrep">
+    <link rel="stylesheet" href="laserprep.css">
+</head>
+<body>
+
+<!-- =================================================== NAV =========== -->
+<nav role="navigation" aria-label="Main toolbar">
+    <div class="nav-top">
+        <div class="nav-logo" aria-label="G&amp;G LaserPrep Studio">
+            <div class="nav-logo-icon" aria-hidden="true">
+                <svg viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <rect x="1" y="1" width="20" height="20" rx="3" stroke="#ff4444" stroke-width="1.2" fill="none"/>
+                    <line x1="3" y1="11" x2="19" y2="11" stroke="#ff4444" stroke-width="0.8" opacity="0.3" class="laser-beam"/>
+                    <circle cx="11" cy="11" r="2.5" fill="none" stroke="#ff4444" stroke-width="1.2"/>
+                    <line x1="11" y1="1" x2="11" y2="5.5" stroke="#ff4444" stroke-width="0.8" opacity="0.5"/>
+                    <line x1="11" y1="16.5" x2="11" y2="21" stroke="#ff4444" stroke-width="0.8" opacity="0.5"/>
+                    <circle cx="11" cy="11" r="1" fill="#ff4444" class="logo-pulse"/>
+                </svg>
+            </div>
+            G&amp;G LASERPREP STUDIO
+            <span class="nav-version">v7</span>
+        </div>
+        <div class="nav-top-actions">
+            <label class="btn primary" title="Import image from gallery"
+                   tabindex="0" role="button" aria-label="Import image file">
+                + Import
+                <input type="file" id="fileInput" accept="image/png,image/jpeg,image/webp"
+                       aria-label="Choose image file">
+            </label>
+            <button id="btnCamera" class="btn-cyan" tabindex="0">📷</button>
+        </div>
+    </div>
+
+    <div class="nav-buttons" id="nav-buttons-container" role="toolbar" aria-label="Quick actions">
+        <button id="btnSimpleMode" class="btn-green" tabindex="0">⚡ Simple</button>
+        <button id="btnAutoPrep"   class="btn-blue"  tabindex="0">Auto Prep</button>
+        <button id="btnSmartMdf"   class="btn-smart-mdf" tabindex="0">Smart MDF</button>
+        <button id="btnBasswoodAutoPrep" class="btn-amber" tabindex="0">🪵 Basswood</button>
+        <div class="nav-divider" role="separator"></div>
+        <button id="btnPerfectEngrave" class="btn-purple" tabindex="0">Perfect Engrave</button>
+        <div class="nav-divider" role="separator"></div>
+        <button id="btnCalibGrid" tabindex="0">Calib Grid</button>
+        <button id="btnHqMode" class="btn-cyan" tabindex="0">HQ Mode</button>
+        <button id="btnReset" tabindex="0">&#x21BA; Reset</button>
+        <div class="nav-divider" role="separator"></div>
+        <button id="btnUndo" tabindex="0" disabled aria-label="Undo (Ctrl+Z)" title="Undo (Ctrl+Z)">&#x21A9;</button>
+        <button id="btnRedo" tabindex="0" disabled aria-label="Redo (Ctrl+Y)" title="Redo (Ctrl+Y)">&#x21AA;</button>
+        <div class="nav-divider" role="separator"></div>
+        <label class="btn btn-blue" tabindex="0" role="button"
+               aria-label="Batch process multiple images" title="Batch process multiple images">
+            &#x29C9; Batch
+            <input type="file" id="batchFileInput" accept="image/png,image/jpeg,image/webp"
+                   multiple aria-label="Select images for batch processing">
+        </label>
+    </div>
+</nav>
+
+<!-- BATCH PROGRESS BAR (hidden until batch active) -->
+<div id="batchProgressTrack" role="progressbar" aria-label="Batch processing progress"
+     aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"
+     style="height:3px;background:var(--bg-panel);display:none;">
+    <div id="batchProgressBar" style="height:100%;width:0%;background:var(--cyan);transition:width 0.3s;"></div>
+</div>
+
+<!-- FIXED EXPORT BAR -->
+<div id="exportBar" role="toolbar" aria-label="Export">
+    <button class="primary" id="btnExport" tabindex="0" aria-label="Export processed image as PNG">
+        &#x2B07; Export PNG
+    </button>
+</div>
+
+<!-- =============================================== WORKSPACE ========= -->
+<main class="workspace" role="main">
+
+    <!-- PREVIEW -->
+    <div class="preview-container" id="previewContainer">
+        <div class="drop-hint" id="dropHint" aria-hidden="true">
+            <svg viewBox="0 0 56 56" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true">
+                <rect x="8" y="8" width="40" height="40" rx="5" stroke-dasharray="3 3"/>
+                <path d="M28 20v16M20 28l8-8 8 8" stroke-width="1.5"/>
+                <circle cx="28" cy="44" r="2" fill="currentColor" opacity="0.4"/>
+            </svg>
+            <div class="drop-hint-title">DROP IMAGE HERE</div>
+            <div class="drop-hint-sub">or use Import / Camera above</div>
+        </div>
+
+        <div class="loader" id="loader" role="status" aria-live="polite" aria-label="Processing image">
+            <div class="loader-ring" aria-hidden="true"></div>
+            <div class="loader-text" aria-hidden="true">PROCESSING</div>
+            <div class="progress-bar-track" aria-hidden="true">
+                <div class="progress-bar-fill" id="progressBarFill"></div>
+            </div>
+            <div class="progress-label" id="progressLabel"></div>
+        </div>
+
+        <div class="split-label" id="splitLabel" aria-hidden="true">&#x25C0; ORIGINAL  |  PROCESSED &#x25B6;</div>
+        <div class="img-stats" id="imgStats" aria-live="polite" aria-label="Image statistics"></div>
+
+        <canvas id="previewCanvas" tabindex="0"></canvas>
+
+        <div class="overlay-tools" role="toolbar" aria-label="Preview tools">
+            <button id="btnSplitView" tabindex="0">A/B</button>
+            <button id="btnToggleZoom" tabindex="0">1:1</button>
+            <div class="tool-divider" role="separator"></div>
+            <button id="btnToggleGrid" tabindex="0">Grid</button>
+            <button id="btnToggleLines" tabindex="0">Lines</button>
+            <button id="btnScanPreview" tabindex="0">Scan</button>
+            <div class="tool-divider" role="separator"></div>
+            <button id="btnToggleHist" tabindex="0">Hist</button>
+            <button id="btnKbHelp" tabindex="0">&#x2328;</button>
+        </div>
+
+        <canvas id="histOverlay" aria-hidden="true"></canvas>
+
+        <div class="zoom-slider-overlay" id="zoomSliderOverlay" aria-label="Zoom level">
+            <input type="range" min="0.1" max="10" step="0.1" value="1" id="zoomSlider"
+                   aria-label="Zoom level" tabindex="0">
+        </div>
+    </div>
+
+    <!-- CONTROLS PANEL -->
+    <div class="controls" id="controlsPanel" role="region" aria-label="Processing controls">
+
+        <!-- SIZE & SCALING -->
+        <div class="section" data-type="size">
+            <div class="section-title" role="button" aria-expanded="true" tabindex="0">
+                <span class="section-title-inner">
+                    <span class="section-dot" aria-hidden="true"></span>Size &amp; Scaling
+                </span>
+                <span class="chev" aria-hidden="true">&#x25BC;</span>
+            </div>
+            <div class="section-body">
+                <div class="grid-2">
+                    <div class="control-group">
+                        <div class="control-header"><label for="imgWidth">Width (mm)</label></div>
+                        <input type="number" id="imgWidth" value="100"
+                               aria-label="Engraving width in millimetres" tabindex="0">
+                    </div>
+                    <div class="control-group">
+                        <div class="control-header"><label for="imgHeight">Height (mm)</label></div>
+                        <input type="number" id="imgHeight" value="100"
+                               aria-label="Engraving height in millimetres" tabindex="0">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div class="control-header">
+                        <label for="imgDpiNum">DPI</label>
+                        <input type="number" id="imgDpiNum" value="300" min="100" max="1200"
+                               aria-label="DPI value" tabindex="0">
+                    </div>
+                    <input type="range" id="imgDpi" min="100" max="1200" step="50" value="300"
+                           aria-label="DPI slider" tabindex="0">
+                </div>
+                <div class="control-group">
+                    <label class="check-label">
+                        <input type="checkbox" id="chkLanczos" checked tabindex="0">
+                        Enable Mitchell-Netravali Resizing
+                    </label>
+                    <label class="check-label">
+                        <input type="checkbox" id="chkCatmullRom" tabindex="0"
+                               aria-label="Use Catmull-Rom (sharper, better for text and line art)">
+                        Catmull-Rom mode (sharper edges &mdash; text &amp; line art)
+                    </label>
+                    <label class="check-label">
+                        <input type="checkbox" id="lockRatio" checked tabindex="0">
+                        Lock Aspect Ratio
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- MATERIAL & PROFILE -->
+        <div class="section" data-type="material">
+            <div class="section-title" role="button" aria-expanded="true" tabindex="0">
+                <span class="section-title-inner">
+                    <span class="section-dot" aria-hidden="true"></span>Material &amp; Profile
+                </span>
+                <span class="chev" aria-hidden="true">&#x25BC;</span>
+            </div>
+            <div class="section-body">
+                <div class="control-group">
+                    <select id="materialSelect" tabindex="0">
+                        <option value="custom">Custom Settings</option>
+                        <optgroup label="Organic">
+                            <option value="bamboo">Bamboo</option>
+                            <option value="basswood">Basswood ply</option>
+                            <option value="mdf">MDF</option>
+                            <option value="leather">Leather</option>
+                            <option value="canvas">Canvas</option>
+                        </optgroup>
+                        <optgroup label="Inorganic">
+                            <option value="glass">Glass</option>
+                            <option value="acrylic">Acrylic</option>
+                            <option value="anodised">Anodised aluminium</option>
+                            <option value="black_tile">Black painted ceramic tile</option>
+                            <option value="white_tile">White painted ceramic tile</option>
+                            <option value="scratch">Rainbow scratch paper</option>
+                        </optgroup>
+                        <optgroup label="Stone">
+                            <option value="slate">Slate</option>
+                            <option value="granite">Granite</option>
+                        </optgroup>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- ENHANCEMENTS & CLIPPING -->
+        <div class="section" data-type="enhance">
+            <div class="section-title" role="button" aria-expanded="true" tabindex="0">
+                <span class="section-title-inner">
+                    <span class="section-dot" aria-hidden="true"></span>Enhancements &amp; Clipping
+                </span>
+                <span class="chev" aria-hidden="true">&#x25BC;</span>
+            </div>
+            <div class="section-body">
+                <div class="control-group">
+                    <div class="control-header">
+                        <label for="slBlack">Black Point</label>
+                        <input type="number" id="valBlack" value="0" aria-label="Black point value" tabindex="0">
+                    </div>
+                    <input type="range" id="slBlack" min="0" max="100" value="0"
+                           aria-label="Black point slider" tabindex="0">
+                </div>
+                <div class="control-group">
+                    <div class="control-header">
+                        <label for="slWhite">White Point</label>
+                        <input type="number" id="valWhite" value="255" aria-label="White point value" tabindex="0">
+                    </div>
+                    <input type="range" id="slWhite" min="150" max="255" value="255"
+                           aria-label="White point slider" tabindex="0">
+                </div>
+                <div class="control-group">
+                    <div class="control-header">
+                        <label for="slBright">Brightness</label>
+                        <input type="number" id="valBright" value="0" aria-label="Brightness value" tabindex="0">
+                    </div>
+                    <input type="range" id="slBright" min="-100" max="100" value="0"
+                           aria-label="Brightness slider" tabindex="0">
+                </div>
+                <div class="control-group">
+                    <div class="control-header">
+                        <label for="slCont">Contrast</label>
+                        <input type="number" id="valCont" value="0" aria-label="Contrast value" tabindex="0">
+                    </div>
+                    <input type="range" id="slCont" min="-100" max="100" value="0"
+                           aria-label="Contrast slider" tabindex="0">
+                </div>
+                <div class="control-group">
+                    <div class="control-header">
+                        <label for="slGamma">Gamma</label>
+                        <input type="number" id="valGamma" value="1" step="0.1" aria-label="Gamma value" tabindex="0">
+                    </div>
+                    <input type="range" id="slGamma" min="0.1" max="3" step="0.1" value="1"
+                           aria-label="Gamma slider" tabindex="0">
+                </div>
+                <div class="control-group">
+                    <div class="control-header">
+                        <label for="slSharp">Sharpen (USM)</label>
+                        <input type="number" id="valSharp" value="0" aria-label="Sharpen value" tabindex="0">
+                    </div>
+                    <input type="range" id="slSharp" min="0" max="100" value="0"
+                           aria-label="Sharpen slider" tabindex="0">
+                </div>
+                <div class="control-group usm-detail-controls">
+                    <div class="control-header">
+                        <label for="selUsmRadius">USM Radius</label>
+                        <select id="selUsmRadius" aria-label="Unsharp mask blur radius" tabindex="0"
+                                style="width:auto;min-width:80px;padding:3px 22px 3px 7px;font-size:0.72rem;">
+                            <option value="1">1px (fine)</option>
+                            <option value="2" selected>2px (balanced)</option>
+                            <option value="3">3px (broad)</option>
+                        </select>
+                    </div>
+                    <div class="control-header" style="margin-top:4px;">
+                        <label for="valUsmThresh">USM Threshold</label>
+                        <input type="number" id="valUsmThresh" value="0" min="0" max="255"
+                               aria-label="Unsharp mask threshold &mdash; skip pixels with contrast below this value (0=sharpen everything, like GIMP default)"
+                               title="0 = sharpen all pixels (GIMP default). Raise to avoid sharpening noise in smooth areas."
+                               tabindex="0" style="width:52px;padding:3px 6px;font-size:0.72rem;">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div class="control-header">
+                        <label for="slLocalContrast">Local Contrast</label>
+                        <input type="number" id="valLocalContrast" value="0" aria-label="Local contrast value" tabindex="0">
+                    </div>
+                    <input type="range" id="slLocalContrast" min="0" max="100" value="0"
+                           aria-label="Local contrast slider" tabindex="0">
+                </div>
+                <div class="control-group">
+                    <div class="control-header">
+                        <label for="slNoise" title="Gaussian blur strength &mdash; smooths film grain and texture noise before processing. Separate from Median Denoise below.">Noise Redux (Gaussian)</label>
+                        <input type="number" id="valNoise" value="0" aria-label="Noise reduction value" tabindex="0">
+                    </div>
+                    <input type="range" id="slNoise" min="0" max="50" value="0"
+                           aria-label="Noise reduction slider" tabindex="0">
+                </div>
+                <div class="control-group">
+                    <div class="control-header">
+                        <label for="slDenoise" title="Spatial median filter &mdash; removes salt-and-pepper / impulse noise while preserving edges better than Gaussian blur.">Median Denoise (Edge-safe)</label>
+                        <input type="number" id="valDenoise" value="0" aria-label="Median denoise value" tabindex="0">
+                    </div>
+                    <input type="range" id="slDenoise" min="0" max="5" value="0"
+                           aria-label="Median denoise slider" tabindex="0">
+                </div>
+                <div class="control-group">
+                    <label class="check-label">
+                        <input type="checkbox" id="chkProtectHigh" tabindex="0">
+                        Protect Highlights
+                    </label>
+                    <label class="check-label">
+                        <input type="checkbox" id="chkHistEq" tabindex="0">
+                        Histogram Equalization
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- DITHERING -->
+        <div class="section" data-type="dither">
+            <div class="section-title" role="button" aria-expanded="true" tabindex="0">
+                <span class="section-title-inner">
+                    <span class="section-dot" aria-hidden="true"></span>Dithering &amp; Adaptive Output
+                </span>
+                <span class="chev" aria-hidden="true">&#x25BC;</span>
+            </div>
+            <div class="section-body">
+                <div class="control-group">
+                    <select id="ditherSelect" tabindex="0">
+                        <option value="none">None (Grayscale)</option>
+                        <option value="adaptive">Adaptive Error Diffusion</option>
+                        <optgroup label="Error Diffusion">
+                            <option value="floyd" selected>Floyd-Steinberg</option>
+                            <option value="jarvis">Jarvis-Judice-Ninke</option>
+                            <option value="stucki">Stucki</option>
+                            <option value="atkinson">Atkinson</option>
+                            <option value="riemersma">Riemersma (Worm-Free &#x2713;)</option>
+                        </optgroup>
+                        <optgroup label="Ordered">
+                            <option value="bayer2">Bayer 2&times;2</option>
+                            <option value="bayer4">Bayer 4&times;4</option>
+                            <option value="bayer8">Bayer 8&times;8</option>
+                        </optgroup>
+                        <optgroup label="Halftone &amp; Threshold">
+                            <option value="halftone">True Halftone</option>
+                            <option value="halftone_lines">Halftone Lines</option>
+                            <option value="halftone_crosshatch">Halftone Crosshatch</option>
+                            <option value="threshold">Pure 1-bit Threshold</option>
+                        </optgroup>
+                    </select>
+                </div>
+                <div class="control-group ctrl-hidden" id="halftoneControls" aria-hidden="true">
+                    <div class="control-header">
+                        <label for="slDot">Halftone Dot Size</label>
+                        <input type="number" id="valDot" value="3" aria-label="Halftone dot size value" tabindex="0">
+                    </div>
+                    <input type="range" id="slDot" min="1" max="10" value="3"
+                           aria-label="Halftone dot size slider" tabindex="0">
+                </div>
+                <div class="control-group ctrl-hidden" id="thresholdControls" aria-hidden="true">
+                    <div class="control-header">
+                        <label for="slThresh">Threshold Level</label>
+                        <input type="number" id="valThresh" value="128" aria-label="Threshold level value" tabindex="0">
+                    </div>
+                    <input type="range" id="slThresh" min="1" max="255" value="128"
+                           aria-label="Threshold level slider" tabindex="0">
+                </div>
+                <div class="control-group">
+                    <label class="check-label">
+                        <input type="checkbox" id="chkInvert" tabindex="0">
+                        Invert Image (Negative)
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- LASER SPOT SIMULATION -->
+        <div class="section" data-type="laser">
+            <div class="section-title" role="button" aria-expanded="true" tabindex="0">
+                <span class="section-title-inner">
+                    <span class="section-dot" aria-hidden="true"></span>Laser Spot Simulation
+                </span>
+                <span class="chev" aria-hidden="true">&#x25BC;</span>
+            </div>
+            <div class="section-body">
+                <div class="control-group">
+                    <label class="check-label">
+                        <input type="checkbox" id="chkSimulate" tabindex="0">
+                        Enable Burn Simulation
+                    </label>
+                </div>
+                <div class="control-group">
+                    <div class="control-header">
+                        <label for="slSpot">Laser Spot Size (mm)</label>
+                        <input type="number" id="valSpot" value="0.08" step="0.01"
+                               aria-label="Laser spot size value" tabindex="0">
+                    </div>
+                    <input type="range" id="slSpot" min="0.02" max="0.2" step="0.01" value="0.08"
+                           aria-label="Laser spot size slider" tabindex="0">
+                </div>
+                <div class="estimation" id="timeEst" role="status" aria-live="polite">
+                    Est. Time: &mdash; (load an image first)
+                </div>
+            </div>
+        </div>
+
+        <!-- EXTENDED TOOLS -->
+        <div class="section" data-type="tools">
+            <div class="section-title" role="button" aria-expanded="true" tabindex="0">
+                <span class="section-title-inner">
+                    <span class="section-dot" aria-hidden="true"></span>Extended Tools
+                </span>
+                <span class="chev" aria-hidden="true">&#x25BC;</span>
+            </div>
+            <div class="section-body">
+                <div class="grid-2">
+                    <button id="btnSaveSet" class="btn-save-config" tabindex="0">Save Config</button>
+                    <button id="btnLoadSet" class="btn-load-config" tabindex="0">Load Config</button>
+                    <button id="btnEstTime" class="btn-est-time"   tabindex="0">Est. Engrave Time</button>
+                    <button id="btnEdgeMode" class="btn-edge-mode" tabindex="0">Edge Engrave</button>
+                    <button id="btnVectorExp" class="btn-vector-exp" tabindex="0">Vector Export</button>
+                    <button id="btnVectorTrace" class="btn-vector-trace" tabindex="0">🔷 Vector Trace</button>
+                    <button id="btnCropRotate" class="btn-crop-rotate" tabindex="0">&#x2702;️ Crop &amp; Rotate</button>
+                    <button id="btnBgRemove" class="btn-bg-remove" tabindex="0">🪄 Remove BG (AI)</button>
+                    <button id="btnGcodeExport" class="btn-gcode-export" tabindex="0">&#x2699; G-Code Export</button>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /controls -->
+</main><!-- /workspace -->
+
+<!-- =========================================== SIMPLE MODE MODAL ===== -->
+<div id="simpleModeModal" class="modal-overlay" role="dialog" aria-modal="true"
+     aria-label="Simple Mode" aria-hidden="true">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>⚡ SIMPLE MODE</h2>
+            <button id="btnCloseSimple" aria-label="Close Simple Mode" tabindex="0">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="simple-steps-hint" aria-hidden="true">
+                <div class="step-dot" data-n="1">Set Size</div>
+                <div class="step-dot" data-n="2">Material</div>
+                <div class="step-dot" data-n="3">Go!</div>
+            </div>
+
+            <div class="simple-step">
+                <label for="simpleWidth">Step 1 &mdash; Engrave size</label>
+                <div class="simple-size-row">
+                    <div>
+                        <div class="simple-dim-label">Width (mm)</div>
+                        <input type="number" id="simpleWidth" value="100" min="10" max="500"
+                               aria-label="Simple mode width in millimetres" tabindex="0">
+                    </div>
+                    <span class="simple-size-separator">&times;</span>
+                    <div>
+                        <div class="simple-dim-label">Height (mm)</div>
+                        <input type="number" id="simpleHeight" value="100" min="10" max="500"
+                               aria-label="Simple mode height in millimetres" tabindex="0">
+                    </div>
+                </div>
+                <div class="simple-tip">💡 Tip: leave at 100&times;100mm if unsure</div>
+            </div>
+
+            <div class="simple-step">
+                <label for="simpleMaterial">Step 2 &mdash; Select material</label>
+                <select id="simpleMaterial" tabindex="0" aria-label="Material selection for Simple Mode">
+                    <optgroup label="Wood">
+                        <option value="basswood">Basswood ply</option>
+                        <option value="bamboo">Bamboo</option>
+                        <option value="mdf">MDF</option>
+                    </optgroup>
+                    <optgroup label="Stone">
+                        <option value="slate">Slate</option>
+                        <option value="granite">Granite</option>
+                    </optgroup>
+                    <optgroup label="Other">
+                        <option value="leather">Leather</option>
+                        <option value="acrylic">Acrylic</option>
+                        <option value="glass">Glass</option>
+                        <option value="anodised">Anodised aluminium</option>
+                        <option value="black_tile">Black painted ceramic tile</option>
+                        <option value="white_tile">White painted ceramic tile</option>
+                        <option value="canvas">Canvas</option>
+                        <option value="scratch">Rainbow scratch paper</option>
+                    </optgroup>
+                </select>
+            </div>
+
+            <div class="simple-step">
+                <label>Step 3 &mdash; Process &amp; download</label>
+                <button id="btnSimpleGo" class="primary" tabindex="0"
+                        aria-label="Process and download PNG">⚡ Process &amp; Download PNG</button>
+                <div class="simple-status" id="simpleStatus" role="status" aria-live="polite"></div>
+            </div>
+
+            <p class="simple-footer-note">
+                Simple Mode automatically applies the best settings for your chosen material,
+                processes your image, and downloads the result &mdash; no tweaking needed.
+                Import an image first, then press Go!
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- KEYBOARD SHORTCUT PANEL -->
+<div id="kbHelp" role="dialog" aria-hidden="true" aria-label="Keyboard shortcuts">
+    <div class="kb-title">Keyboard shortcuts</div>
+    <div><kbd>Ctrl+Z</kbd> Undo</div>
+    <div><kbd>Ctrl+Y</kbd> Redo</div>
+    <div><kbd>E</kbd> Export PNG</div>
+    <div><kbd>S</kbd> Split view</div>
+    <div><kbd>I</kbd> Invert toggle</div>
+    <div><kbd>R</kbd> Reset view</div>
+    <div><kbd>Space</kbd> Re-process</div>
+    <div><kbd>?</kbd> This help</div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+<!-- ======================================= VECTOR TRACE MODAL ==== -->
+<div id="vectorTraceModal" class="modal-overlay" role="dialog" aria-modal="true"
+     aria-label="Vector Trace" aria-hidden="true">
+    <div class="modal-content modal-wide">
+        <div class="modal-header">
+            <h2>🔷 VECTOR TRACE</h2>
+            <button id="btnCloseVectorTrace" aria-label="Close Vector Trace" tabindex="0">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="control-group">
+                <label for="vtMode">Trace Mode</label>
+                <select id="vtMode" tabindex="0">
+                    <option value="contour">Contour (Outline shapes)</option>
+                    <option value="centerline">Centerline (Stroke paths)</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <div class="control-header">
+                    <label for="vtThreshold">Threshold</label>
+                    <input type="number" id="vtThreshNum" value="128" min="1" max="255" tabindex="0">
+                </div>
+                <input type="range" id="vtThreshold" min="1" max="255" value="128" tabindex="0">
+            </div>
+            <div class="control-group">
+                <div class="control-header">
+                    <label for="vtSmooth">Path Smoothing</label>
+                    <input type="number" id="vtSmoothNum" value="2" min="0" max="10" tabindex="0">
+                </div>
+                <input type="range" id="vtSmooth" min="0" max="10" value="2" tabindex="0">
+            </div>
+            <div class="control-group">
+                <label class="check-label">
+                    <input type="checkbox" id="vtOptimise" checked tabindex="0">
+                    Optimise paths (merge endpoints, remove collinear points)
+                </label>
+                <label class="check-label">
+                    <input type="checkbox" id="vtInvert" tabindex="0">
+                    Invert (trace light areas)
+                </label>
+            </div>
+            <div class="grid-2" style="margin-top:12px;">
+                <button id="btnVtPreview" class="btn-blue" tabindex="0">👁 Preview Trace</button>
+                <button id="btnVtExportSvg" class="primary" tabindex="0">&#x2B07; Export SVG</button>
+            </div>
+            <div id="vtStatus" style="margin-top:10px;font-size:0.8rem;color:var(--amber);"></div>
+            <canvas id="vtPreviewCanvas" style="margin-top:12px;max-width:100%;border:1px solid var(--border);display:none;"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- ======================================= CROP & ROTATE MODAL ==== -->
+<div id="cropRotateModal" class="modal-overlay" role="dialog" aria-modal="true"
+     aria-label="Crop and Rotate" aria-hidden="true">
+    <div class="modal-content modal-wide">
+        <div class="modal-header">
+            <h2>&#x2702;️ CROP &amp; ROTATE</h2>
+            <button id="btnCloseCropRotate" aria-label="Close Crop and Rotate" tabindex="0">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="control-group">
+                <div class="control-header">
+                    <label for="crRotation">Rotation (&deg;)</label>
+                    <input type="number" id="crRotNum" value="0" min="-180" max="180" step="0.5" tabindex="0">
+                </div>
+                <input type="range" id="crRotation" min="-180" max="180" step="0.5" value="0" tabindex="0">
+            </div>
+            <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+                <button class="btn btn-blue" id="btnCrRot90" tabindex="0">&#x21B7; 90&deg;</button>
+                <button class="btn btn-blue" id="btnCrRotN90" tabindex="0">&#x21B6; -90&deg;</button>
+                <button class="btn btn-blue" id="btnCrRot180" tabindex="0">&#x21BA; 180&deg;</button>
+                <button class="btn btn-blue" id="btnCrFlipH" tabindex="0">&#x21C6; Flip H</button>
+                <button class="btn btn-blue" id="btnCrFlipV" tabindex="0">&#x21C5; Flip V</button>
+            </div>
+            <p style="font-size:0.78rem;color:var(--text-dim);margin:0 0 8px;">Drag the handles on the preview to set crop region:</p>
+            <div id="crCanvasWrap" style="position:relative;display:inline-block;max-width:100%;cursor:crosshair;">
+                <canvas id="crCanvas" style="max-width:100%;border:1px solid var(--border);display:block;"></canvas>
+                <canvas id="crOverlay" style="position:absolute;top:0;left:0;pointer-events:none;"></canvas>
+            </div>
+            <div class="grid-2" style="margin-top:12px;">
+                <button id="btnCrReset" class="btn" tabindex="0">&#x21BA; Reset</button>
+                <button id="btnCrApply" class="primary" tabindex="0">&#x2713; Apply &amp; Process</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ======================================= G-CODE EXPORT MODAL ==== -->
+<div id="gcodeModal" class="modal-overlay" role="dialog" aria-modal="true"
+     aria-label="G-Code Export" aria-hidden="true">
+    <div class="modal-content modal-wide">
+        <div class="modal-header">
+            <h2>&#x2699; G-CODE EXPORT</h2>
+            <button id="btnCloseGcode" aria-label="Close G-Code Export" tabindex="0">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="grid-2">
+                <div class="control-group">
+                    <label for="gcFirmware">Firmware</label>
+                    <select id="gcFirmware" tabindex="0">
+                        <option value="grbl">GRBL / LightBurn</option>
+                        <option value="marlin">Marlin</option>
+                        <option value="smoothie">Smoothieware</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label for="gcMode">Engrave Mode</label>
+                    <select id="gcMode" tabindex="0">
+                        <option value="raster">Raster scan (line-by-line)</option>
+                        <option value="vector">Vector outlines only</option>
+                    </select>
+                </div>
+            </div>
+            <div class="grid-2">
+                <div class="control-group">
+                    <label for="gcPower">Laser Power (S max)</label>
+                    <input type="number" id="gcPower" value="1000" min="1" max="65535" tabindex="0">
+                </div>
+                <div class="control-group">
+                    <label for="gcSpeed">Feed Rate (mm/min)</label>
+                    <input type="number" id="gcSpeed" value="3000" min="100" max="30000" tabindex="0">
+                </div>
+            </div>
+            <div class="grid-2">
+                <div class="control-group">
+                    <label for="gcPassDepth">Pass Depth (mm) <small style="color:var(--text-dim)">(0=disable Z)</small></label>
+                    <input type="number" id="gcPassDepth" value="0" min="0" max="20" step="0.1" tabindex="0">
+                </div>
+                <div class="control-group">
+                    <label for="gcPasses">Passes</label>
+                    <input type="number" id="gcPasses" value="1" min="1" max="10" tabindex="0">
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="check-label">
+                    <input type="checkbox" id="gcLaserMode" checked tabindex="0">
+                    Enable laser mode ($32=1 / M3 S dynamic)
+                </label>
+                <label class="check-label">
+                    <input type="checkbox" id="gcHome" checked tabindex="0">
+                    Return to origin after job (G28 / G0 X0 Y0)
+                </label>
+            </div>
+            <div id="gcStatus" style="margin-top:8px;font-size:0.8rem;color:var(--amber);"></div>
+            <div class="grid-2" style="margin-top:12px;">
+                <button id="btnGcPreview" class="btn-blue" tabindex="0">👁 Preview</button>
+                <button id="btnGcDownload" class="primary" tabindex="0">&#x2B07; Download .nc</button>
+            </div>
+            <textarea id="gcPreviewText" readonly tabindex="0"
+                style="display:none;margin-top:12px;width:100%;height:200px;font-family:monospace;
+                       font-size:0.72rem;background:var(--bg-input);color:var(--text);
+                       border:1px solid var(--border);padding:8px;resize:vertical;box-sizing:border-box;"></textarea>
+        </div>
+    </div>
+</div>
+
+<!-- =================================================== SCRIPTS ======== -->
+<script src="laserprep.js"></script>
+<script>
+    // ─── G&G LaserPrep © 2026 Stephanie Adams ─────────────────────────────────
+    // Licence splash — built in JS and injected only when needed.
+    // Nothing sits in the DOM unless it's actively being shown.
+    // ──────────────────────────────────────────────────────────────────────────
+
+    (function() {
+        const KEY  = 'gg_laserprep_licence_v1';
+        const HOST = 'laserprep.pages.dev'; // Cloudflare domain
+
+        // ── helpers ──────────────────────────────────────────────────────────
+        function accepted() {
+            try { return localStorage.getItem(KEY) === '1'; } catch(e) { return false; }
+        }
+
+        function accept() {
+            try { localStorage.setItem(KEY, '1'); } catch(e) {}
+            // Remove modal overlay
+            const el = document.getElementById('_ggSplash');
+            if (el) el.remove();
+            // Inject permanent footer credit
+            injectFooter();
+        }
+
+        function injectFooter() {
+            if (document.getElementById('_ggFooter')) return;
+            const f = document.createElement('div');
+            f.id = '_ggFooter';
+            f.setAttribute('aria-hidden','true');
+            f.style.cssText = [
+                'position:fixed','bottom:0','left:0','right:0','z-index:9000',
+                'background:#0d0d0d','border-top:1px solid #1e1e1e',
+                'font-family:Space Mono,monospace','font-size:0.62rem',
+                'color:#444','text-align:center','padding:4px 10px',
+                'letter-spacing:0.05em','pointer-events:none','user-select:none'
+            ].join(';');
+            f.textContent = '\u00a9 2026 Stephanie Adams \u00b7 G&G LaserPrep \u00b7 All Rights Reserved';
+            document.body.appendChild(f);
+        }
+
+        function injectUnauthorisedBanner() {
+            if (document.getElementById('_ggBanner')) return;
+            const b = document.createElement('div');
+            b.id = '_ggBanner';
+            b.setAttribute('aria-hidden','true');
+            b.style.cssText = [
+                'position:fixed','bottom:0','left:0','right:0','z-index:9001',
+                'background:#cc0000','color:#fff',
+                'font-family:Space Mono,monospace','font-size:0.72rem','font-weight:bold',
+                'text-align:center','padding:6px 40px 6px 16px',
+                'pointer-events:auto','user-select:none','line-height:1.4'
+            ].join(';');
+            b.innerHTML = '\u26a0\ufe0f UNAUTHORISED COPY \u2014 Created by Stephanie Adams \u00a9 2026. Redistribution prohibited.' +
+                '<span onclick="this.parentNode.remove()" style="position:absolute;right:10px;top:50%;' +
+                'transform:translateY(-50%);cursor:pointer;font-size:1rem;opacity:0.8;padding:4px;">✕</span>';
+            document.body.appendChild(b);
+        }
+
+        function injectSplash() {
+            const overlay = document.createElement('div');
+            overlay.id = '_ggSplash';
+            overlay.style.cssText = [
+                'position:fixed','inset:0','z-index:99998',
+                'background:rgba(0,0,0,0.93)',
+                'display:flex','align-items:center','justify-content:center',
+                'font-family:Space Mono,monospace'
+            ].join(';');
+
+            overlay.innerHTML = [
+                '<div style="background:#111;border:1px solid #ff4444;border-radius:10px;',
+                'max-width:500px;width:90%;padding:28px 24px;color:#e0e0e0;',
+                'box-shadow:0 0 40px rgba(255,68,68,0.2);">',
+
+                '<div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;">',
+                '<svg viewBox="0 0 22 22" width="32" height="32" fill="none">',
+                '<rect x="1" y="1" width="20" height="20" rx="3" stroke="#ff4444" stroke-width="1.2" fill="none"/>',
+                '<circle cx="11" cy="11" r="2.5" fill="none" stroke="#ff4444" stroke-width="1.2"/>',
+                '<line x1="3" y1="11" x2="19" y2="11" stroke="#ff4444" stroke-width="0.8" opacity="0.4"/>',
+                '</svg>',
+                '<div>',
+                '<div style="color:#ff4444;font-size:0.95rem;font-weight:700;letter-spacing:0.07em;">G&amp;G LaserPrep Pro</div>',
+                '<div style="font-size:0.68rem;color:#666;margin-top:2px;">\u00a9 2026 Stephanie Adams \u2014 All Rights Reserved</div>',
+                '</div></div>',
+
+                '<div style="border-top:1px solid #222;padding-top:16px;margin-bottom:16px;">',
+                '<p style="font-size:0.75rem;line-height:1.6;color:#ccc;margin:0 0 10px;">',
+                'This tool was designed and built by <strong style="color:#ff4444;">Stephanie Adams</strong>, ',
+                'Stoke-on-Trent, UK.</p>',
+                '<p style="font-size:0.75rem;line-height:1.6;color:#ccc;margin:0 0 8px;">By continuing you agree:</p>',
+                '<ul style="font-size:0.73rem;line-height:1.75;color:#aaa;margin:0 0 10px;padding-left:16px;">',
+                '<li>This software is the intellectual property of Stephanie Adams.</li>',
+                '<li>You may <strong style="color:#fff;">not</strong> copy, redistribute, or claim it as your own.</li>',
+                '<li>You may <strong style="color:#fff;">not</strong> share this app without permission from the author.</li>',
+                '</ul>',
+                '<p style="font-size:0.68rem;color:#555;margin:0;">Enquiries: G&amp;G LaserPrep, Stoke-on-Trent.</p>',
+                '</div>',
+
+                '<div style="display:flex;gap:10px;justify-content:flex-end;">',
+                '<button id="_ggDecline" style="background:transparent;border:1px solid #444;color:#666;',
+                'border-radius:5px;padding:8px 16px;font-family:inherit;font-size:0.75rem;cursor:pointer;">',
+                '\u2715 Decline &amp; Leave</button>',
+                '<button id="_ggAccept" style="background:#ff4444;border:none;color:#fff;',
+                'border-radius:5px;padding:8px 20px;font-family:inherit;font-size:0.75rem;',
+                'font-weight:700;cursor:pointer;">\u2713 I Agree \u2014 Continue</button>',
+                '</div>',
+                '</div>'
+            ].join('');
+
+            document.body.appendChild(overlay);
+
+            document.getElementById('_ggAccept').addEventListener('click', accept);
+            document.getElementById('_ggDecline').addEventListener('click', function() {
+                overlay.remove();
+                window.history.back();
+            });
+        }
+
+        // ── run ──────────────────────────────────────────────────────────────
+        const host = (location.hostname || '').toLowerCase();
+        const isLocal = location.protocol === 'file:' || host === 'localhost' ||
+                        host === '127.0.0.1' || host.startsWith('192.168.');
+        const isAuth  = isLocal || host.includes(HOST);
+
+        if (!isAuth) injectUnauthorisedBanner();
+
+        if (accepted()) {
+            // Returning visitor — just show the footer credit, nothing blocking
+            injectFooter();
+        } else {
+            // First visit — show licence splash
+            injectSplash();
+        }
+    })();
+
+    // Register the Service Worker
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+                .then((reg) => console.log('Service worker registered.', reg))
+                .catch((err) => console.log('Service worker registration failed:', err));
+        });
+    }
+</script>
+
+</body>
+</html>
