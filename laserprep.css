@@ -1239,3 +1239,124 @@ button:disabled:hover {
 #exportBar #btnExport.pending {
     animation: exportPulse 1.5s ease-in-out infinite;
 }
+
+/* ── HELP MODAL ──────────────────────────────────────────────────────── */
+.help-section {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    background: var(--bg-section);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.help-section-title {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+}
+.help-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.help-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 0.82rem;
+    color: #ccc;
+    line-height: 1.5;
+}
+.help-step-num {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.help-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 0.8rem;
+    color: #bbb;
+    line-height: 1.5;
+}
+.help-badge {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+.help-badge.green  { background: rgba(0,230,118,0.15); color: var(--green);  border: 1px solid rgba(0,230,118,0.3); }
+.help-badge.blue   { background: rgba(74,158,255,0.15); color: var(--blue);  border: 1px solid rgba(74,158,255,0.3); }
+.help-badge.orange { background: rgba(255,140,60,0.15); color: #ff9050;      border: 1px solid rgba(255,140,60,0.3); }
+.help-badge.amber  { background: rgba(255,170,0,0.15);  color: var(--amber); border: 1px solid rgba(255,170,0,0.3); }
+.help-badge.purple { background: rgba(192,132,252,0.15);color: var(--purple);border: 1px solid rgba(192,132,252,0.3); }
+.help-badge.cyan   { background: rgba(34,211,238,0.15); color: var(--cyan);  border: 1px solid rgba(34,211,238,0.3); }
+.help-badge-plain {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-top: 1px;
+    background: rgba(255,255,255,0.06);
+    color: #aaa;
+    border: 1px solid var(--border-hi);
+}
+.help-note {
+    font-size: 0.78rem;
+    color: var(--green);
+    background: rgba(0,230,118,0.08);
+    border: 1px solid rgba(0,230,118,0.2);
+    border-radius: 6px;
+    padding: 8px 12px;
+    line-height: 1.5;
+}
+.help-para {
+    font-size: 0.8rem;
+    color: #bbb;
+    line-height: 1.6;
+    margin: 0;
+}
+.help-footer {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    color: var(--text-muted);
+    text-align: center;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+    letter-spacing: 0.04em;
+}
+
+/* Processing note inside loader */
+.processing-note {
+    font-family: var(--font-mono);
+    font-size: 0.58rem;
+    color: var(--text-muted);
+    text-align: center;
+    letter-spacing: 0.06em;
+    margin-top: 4px;
+    max-width: 220px;
+    line-height: 1.5;
+}

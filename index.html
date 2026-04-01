@@ -126,6 +126,7 @@
                 <div class="progress-bar-fill" id="progressBarFill"></div>
             </div>
             <div class="progress-label" id="progressLabel"></div>
+            <div class="processing-note">Large images may take up to 60 seconds &mdash; please wait</div>
         </div>
 
         <div class="split-label" id="splitLabel" aria-hidden="true">&#x25C0; ORIGINAL  |  PROCESSED &#x25B6;</div>
@@ -143,6 +144,7 @@
             <div class="tool-divider" role="separator"></div>
             <button id="btnToggleHist" tabindex="0">Hist</button>
             <button id="btnKbHelp" tabindex="0">&#x2328;</button>
+            <button id="btnHelp" class="btn-cyan" tabindex="0" aria-label="Help and guide">?</button>
         </div>
 
         <canvas id="histOverlay" aria-hidden="true"></canvas>
@@ -642,6 +644,118 @@
     </div>
 </div>
 
+
+<!-- ============================================= HELP MODAL ========= -->
+<div id="helpModal" class="modal-overlay" role="dialog" aria-modal="true"
+     aria-label="Help and Guide" aria-hidden="true">
+    <div class="modal-content modal-wide">
+        <div class="modal-header">
+            <h2>? GUIDE &amp; HELP</h2>
+            <button id="btnCloseHelp" aria-label="Close Help" tabindex="0">&times;</button>
+        </div>
+        <div class="modal-body">
+
+            <!-- QUICK START -->
+            <div class="help-section">
+                <div class="help-section-title">&#x26A1; Quick Start &mdash; 4 steps</div>
+                <div class="help-steps">
+                    <div class="help-step">
+                        <div class="help-step-num">1</div>
+                        <div><strong>Import</strong> &mdash; tap + Import or the camera button to load your image</div>
+                    </div>
+                    <div class="help-step">
+                        <div class="help-step-num">2</div>
+                        <div><strong>Size</strong> &mdash; set your engraving width and height in mm to match your material</div>
+                    </div>
+                    <div class="help-step">
+                        <div class="help-step-num">3</div>
+                        <div><strong>Material</strong> &mdash; pick your material from the dropdown. The app sets everything else automatically</div>
+                    </div>
+                    <div class="help-step">
+                        <div class="help-step-num">4</div>
+                        <div><strong>Export PNG</strong> &mdash; tap the red button at the bottom. Done</div>
+                    </div>
+                </div>
+                <p class="help-note">That is all you need. The sliders and advanced settings are optional fine-tuning &mdash; you do not need to touch them for great results.</p>
+            </div>
+
+            <!-- PRESET BUTTONS -->
+            <div class="help-section">
+                <div class="help-section-title">&#x1F4CB; What the preset buttons do</div>
+                <div class="help-item">
+                    <span class="help-badge green">&#x26A1; Simple</span>
+                    <span>Guided step-by-step mode for beginners. Walks you through size, material and export in a clean popup.</span>
+                </div>
+                <div class="help-item">
+                    <span class="help-badge blue">Auto Prep</span>
+                    <span>Applies a balanced general-purpose preset. Good starting point for most images on most materials.</span>
+                </div>
+                <div class="help-item">
+                    <span class="help-badge orange">Smart MDF</span>
+                    <span>Analyses your image scientifically and applies optimised settings specifically for MDF. Uses histogram analysis to pick the best dithering pattern automatically.</span>
+                </div>
+                <div class="help-item">
+                    <span class="help-badge amber">&#x1F6A7; Basswood</span>
+                    <span>Preset tuned for pale basswood ply. Lifts shadows and boosts local contrast to compensate for basswood&apos;s low burn contrast.</span>
+                </div>
+                <div class="help-item">
+                    <span class="help-badge purple">Perfect Engrave</span>
+                    <span>Reads the processed image, analyses its tonal range and contrast, then automatically picks the best dithering algorithm for that specific image.</span>
+                </div>
+                <div class="help-item">
+                    <span class="help-badge cyan">HQ Mode</span>
+                    <span>Doubles the DPI for finer detail. Slower to process and produces a larger file. Best for small detailed engravings.</span>
+                </div>
+            </div>
+
+            <!-- HOW IT WORKS -->
+            <div class="help-section">
+                <div class="help-section-title">&#x2699; How the processing works</div>
+                <p class="help-para">Every image goes through a scientifically correct pipeline:</p>
+                <div class="help-item">
+                    <span class="help-badge-plain">Resize</span>
+                    <span>Mitchell-Netravali bicubic resampling &mdash; the same algorithm used by professional print software. Preserves fine detail when scaling down.</span>
+                </div>
+                <div class="help-item">
+                    <span class="help-badge-plain">Greyscale</span>
+                    <span>Rec.709 luminance formula (the broadcast TV standard) &mdash; weights red, green and blue correctly for human perception rather than averaging them equally.</span>
+                </div>
+                <div class="help-item">
+                    <span class="help-badge-plain">Tonal</span>
+                    <span>Contrast, brightness, gamma and black/white point are applied in the correct scientific order to preserve detail across the full tonal range.</span>
+                </div>
+                <div class="help-item">
+                    <span class="help-badge-plain">Dithering</span>
+                    <span>Converts greyscale to pure black and white using error-diffusion or ordered patterns. This is what makes gradients look smooth when engraved. The material preset picks the right algorithm automatically.</span>
+                </div>
+                <div class="help-item">
+                    <span class="help-badge-plain">DPI</span>
+                    <span>The exported PNG has DPI metadata embedded so your laser controller knows the exact physical size without you needing to enter it manually.</span>
+                </div>
+            </div>
+
+            <!-- PROCESSING TIME -->
+            <div class="help-section">
+                <div class="help-section-title">&#x23F1; Processing time</div>
+                <p class="help-para">Most images process in 5&ndash;15 seconds. Large images at high DPI or with error-diffusion dithering (Floyd-Steinberg, Jarvis, Stucki) can take up to 60 seconds. The app is working &mdash; the spinning circle and progress bar confirm this. Do not close the app while processing.</p>
+            </div>
+
+            <!-- TIPS -->
+            <div class="help-section">
+                <div class="help-section-title">&#x1F4A1; Tips</div>
+                <p class="help-para">Change one thing at a time. The image re-processes every time you adjust a slider &mdash; if you move several at once you will not know which one made the difference.</p>
+                <p class="help-para">The A/B button in the preview lets you compare the original and processed versions side by side by dragging the divider.</p>
+                <p class="help-para">Double-tap any slider to reset it to its default value.</p>
+                <p class="help-para">Your settings are automatically saved and restored next time you open the app.</p>
+            </div>
+
+            <div class="help-footer">
+                G&amp;G LaserPrep Pro Studio &mdash; created by Stephanie Adams, Stoke-on-Trent &mdash; &copy; 2026
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- ======================================= G-CODE EXPORT MODAL ==== -->
 <div id="gcodeModal" class="modal-overlay" role="dialog" aria-modal="true"
      aria-label="G-Code Export" aria-hidden="true">
@@ -714,14 +828,15 @@
 <!-- =================================================== SCRIPTS ======== -->
 <script src="laserprep.js"></script>
 <script>
-    // ─── G&G LaserPrep © 2026 Stephanie Adams ─────────────────────────────────
-    // Licence splash — built in JS and injected only when needed.
+    // ─── G&G LaserPrep (c) 2026 Stephanie Adams ─────────────────────────────────
+    // Licence splash  -  built in JS and injected only when needed.
     // Nothing sits in the DOM unless it's actively being shown.
     // ──────────────────────────────────────────────────────────────────────────
 
     (function() {
         const KEY  = 'gg_laserprep_licence_v1';
-        const HOST = 'laserprep.pages.dev'; // Cloudflare domain
+        const HOST = 'laserprep.pages.dev'; // authorised domains
+        const HOST2 = 'github.io'; // GitHub Pages
 
         // ── helpers ──────────────────────────────────────────────────────────
         function accepted() {
@@ -834,15 +949,15 @@
         const host = (location.hostname || '').toLowerCase();
         const isLocal = location.protocol === 'file:' || host === 'localhost' ||
                         host === '127.0.0.1' || host.startsWith('192.168.');
-        const isAuth  = isLocal || host.includes(HOST);
+        const isAuth  = isLocal || host.includes(HOST) || host.includes(HOST2);
 
         if (!isAuth) injectUnauthorisedBanner();
 
         if (accepted()) {
-            // Returning visitor — just show the footer credit, nothing blocking
+            // Returning visitor  -  just show the footer credit, nothing blocking
             injectFooter();
         } else {
-            // First visit — show licence splash
+            // First visit  -  show licence splash
             injectSplash();
         }
     })();

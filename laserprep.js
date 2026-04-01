@@ -715,9 +715,13 @@
     function validateFile(file) {
         if (!file) return ['No file provided'];
         const errs = [];
-        if (!ALLOWED_TYPES.has(file.type))
-            errs.push('Unsupported format: ' + (file.type||'unknown') + '. Use PNG, JPEG, WebP, GIF or BMP.');
-        if (file.size > MAX_FILE_BYTES)
+        // Android content:// URIs often return empty MIME type - check extension too
+        const mimeOk = ALLOWED_TYPES.has(file.type);
+        const extOk  = /\.(png|jpe?g|webp|gif|bmp)$/i.test(file.name || '');
+        const typeUnknown = !file.type || file.type === 'application/octet-stream';
+        if (!mimeOk && !extOk && !typeUnknown)
+            errs.push('Unsupported format: ' + file.type + '. Use PNG, JPEG, WebP, GIF or BMP.');
+        if (file.size > 0 && file.size > MAX_FILE_BYTES)
             errs.push('File too large: ' + (file.size/1048576).toFixed(1) + 'MB (max 50MB).');
         return errs;
     }
@@ -1085,9 +1089,6 @@
        FILE LOADING  -  with validation, EXIF orientation, error boundary
     ================================================================ */
     function loadImageFile(file) {
-        /* Debug: confirm function is called on Android */
-        toast('Loading: ' + (file ? (file.name||'unnamed')+' '+(file.type||'no-type')+' '+file.size+'b' : 'NO FILE'), 4000);
-        console.log('[loadImageFile]', file ? file.name : 'null', file ? file.type : 'null', file ? file.size : 0);
         /* -- Input validation -- */
         const fileErrors = validateFile(file);
         if (fileErrors.length) {
@@ -1581,6 +1582,28 @@
     }
 
     if (kbBtn) kbBtn.addEventListener('click', toggleKbHelp);
+
+    /* Help modal */
+    (function initHelp() {
+        var btn   = $('btnHelp');
+        var modal = $('helpModal');
+        var close = $('btnCloseHelp');
+        if (!btn || !modal) return;
+        btn.addEventListener('click', function() {
+            modal.classList.add('open');
+            modal.setAttribute('aria-hidden', 'false');
+        });
+        if (close) close.addEventListener('click', function() {
+            modal.classList.remove('open');
+            modal.setAttribute('aria-hidden', 'true');
+        });
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                modal.classList.remove('open');
+                modal.setAttribute('aria-hidden', 'true');
+            }
+        });
+    })();
 
     document.addEventListener('click', (e) => {
         if (kbVisible && kbHelp && !kbHelp.contains(e.target) && e.target !== kbBtn) {
