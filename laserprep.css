@@ -1360,3 +1360,25 @@ button:disabled:hover {
     max-width: 220px;
     line-height: 1.5;
 }
+
+/* ── Simulation preview-only label ──────────────────────────────────── */
+.sim-preview-label {
+    font-size: 0.65rem;
+    color: var(--amber);
+    font-style: italic;
+    margin-left: 4px;
+    opacity: 0.8;
+}
+
+/* Export button when simulation is active - amber tint to signal "preview mode on" */
+#exportBar #btnExport[data-sim] {
+    background: linear-gradient(135deg, #cc7700 0%, #995500 100%);
+    border-color: var(--amber);
+    box-shadow: 0 2px 12px rgba(255,170,0,0.4);
+}
+#exportBar #btnExport[data-sim]::after {
+    content: ' (sim on)';
+    font-size: 0.7rem;
+    opacity: 0.8;
+    font-weight: 400;
+}

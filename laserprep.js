@@ -231,11 +231,25 @@
         }, 280);
     }
 
+    function updateSimIndicator() {
+        const btn = $('btnExport');
+        if (!btn) return;
+        const simOn = $('chkSimulate') && $('chkSimulate').checked;
+        if (simOn) {
+            btn.title = 'Export PNG (simulation is on - exported file will be CLEAN, not simulated)';
+            btn.setAttribute('data-sim', '1');
+        } else {
+            btn.title = 'Export processed image as PNG';
+            btn.removeAttribute('data-sim');
+        }
+    }
+
     function endProcessing() {
         state.isProcessing = false;
         loader.classList.remove('visible');
         updateProgressBar(0, '');
         updateImgStats();
+        updateSimIndicator();
         if (navigator.vibrate) navigator.vibrate(20);
         /* Batch callback  -  called once per image when batch is active */
         if (state.batchActive && typeof state._batchOnComplete === 'function') {
@@ -1458,19 +1472,9 @@
     /* ================================================================
        SECTION COLLAPSE / EXPAND
     ================================================================ */
-    const STORE_KEY     = 'gg_sections';
-    const STORE_VERSION = 'v2'; /* bump to reset all users to new defaults */
-    const storedVersion = localStorage.getItem('gg_sections_ver') || 'v1';
+    const STORE_KEY = 'gg_sections';
     let collapsedSections = {};
-    try {
-        if (storedVersion === STORE_VERSION) {
-            collapsedSections = JSON.parse(localStorage.getItem(STORE_KEY) || '{}');
-        } else {
-            /* Version changed - clear stored state so new defaults apply */
-            localStorage.removeItem(STORE_KEY);
-            localStorage.setItem('gg_sections_ver', STORE_VERSION);
-        }
-    } catch(e) {}
+    try { collapsedSections = JSON.parse(localStorage.getItem(STORE_KEY) || '{}'); } catch(e) {}
 
     /* FIX: If every stored section is collapsed the user can't open anything.
        This happens when localStorage was saved in a fully-collapsed state.
@@ -1484,14 +1488,10 @@
         }
     })();
 
-    /* On first visit collapse everything except Size(0) and Material(1) */
-    const DEFAULT_OPEN = new Set([0, 1]);
     document.querySelectorAll('.section-title').forEach((title, idx) => {
         const section = title.closest('.section');
         const key = 'sec_' + idx;
-        const savedVal = collapsedSections[key];
-        const shouldCollapse = (savedVal !== undefined) ? savedVal : !DEFAULT_OPEN.has(idx);
-        if (shouldCollapse) section.classList.add('collapsed');
+        if (collapsedSections[key]) section.classList.add('collapsed');
         title.setAttribute('tabindex', '0');
         title.setAttribute('role', 'button');
         title.setAttribute('aria-expanded', !collapsedSections[key]);
@@ -1996,7 +1996,10 @@
     bindInputs('slWhite','valWhite');     bindInputs('slNoise','valNoise');
 
     ['chkProtectHigh','chkHistEq','chkInvert','chkSimulate','chkLanczos','chkCatmullRom'].forEach(id => {
-        const el = $(id); if (el) el.addEventListener('change', queueProcess);
+        const el = $(id); if (el) el.addEventListener('change', () => {
+            queueProcess();
+            if (id === 'chkSimulate') updateSimIndicator();
+        });
     });
     /* USM radius and threshold controls */
     const selUsmRadius = $('selUsmRadius');
@@ -2611,8 +2614,6 @@
         }
 
         $('btnVtPreview').addEventListener('click',()=>{
-            vtStatus.textContent='Tracing...';
-            setTimeout(()=>{
             const r=runTrace(); if(!r) return;
             vtPrev.style.display='block';
             const scale=Math.min(440/r.w,300/r.h,1);
@@ -2632,18 +2633,15 @@
                 pCtx.stroke();
             }
             pCtx.restore();
-            }, 0); /* end setTimeout */
         });
 
         $('btnVtExportSvg').addEventListener('click',()=>{
-            vtStatus.textContent='Tracing...';
-            setTimeout(()=>{
-                const r=runTrace(); if(!r) return;
-                const svg=buildSVG(r.paths,r.w,r.h,r.smooth);
-                const blob=new Blob([svg],{type:'image/svg+xml'});
-                triggerDownload(blob, 'GG_VectorTrace.svg', 'image/svg+xml');
-                toast('Vector trace SVG exported');
-            }, 0);
+            const r=runTrace(); if(!r) return;
+            const svg=buildSVG(r.paths,r.w,r.h,r.smooth);
+            const blob=new Blob([svg],{type:'image/svg+xml'});
+            const a=document.createElement('a');
+            triggerDownload(blob, 'GG_VectorTrace.svg', 'image/svg+xml');
+            toast('Vector trace SVG exported');
         });
     })();
 
@@ -2692,59 +2690,35 @@
             if(!crImage) return;
             const maxW=480, maxH=360;
             const nat=crImage;
-            const rot=crState.rotation * Math.PI / 180;
-            /* Expand canvas to fit rotated image so corners are never clipped */
-            const sinA=Math.abs(Math.sin(rot)), cosA=Math.abs(Math.cos(rot));
-            const rotW=Math.round(nat.width*cosA + nat.height*sinA);
-            const rotH=Math.round(nat.width*sinA + nat.height*cosA);
-            crScale=Math.min(maxW/rotW, maxH/rotH, 1);
-            crCanvas.width =Math.round(rotW*crScale);
-            crCanvas.height=Math.round(rotH*crScale);
+            crScale=Math.min(maxW/nat.width, maxH/nat.height, 1);
+            crCanvas.width =Math.round(nat.width*crScale);
+            crCanvas.height=Math.round(nat.height*crScale);
             crOverlay.width=crCanvas.width; crOverlay.height=crCanvas.height;
             crOverlay.style.width=crCanvas.width+'px'; crOverlay.style.height=crCanvas.height+'px';
 
-            /* Draw rotated+flipped image centred on expanded canvas */
+            /* Draw rotated+flipped image */
             crCtx.save();
-            crCtx.clearRect(0,0,crCanvas.width,crCanvas.height);
             crCtx.translate(crCanvas.width/2, crCanvas.height/2);
-            crCtx.rotate(rot);
+            crCtx.rotate(crState.rotation*Math.PI/180);
             crCtx.scale(crState.flipH?-1:1, crState.flipV?-1:1);
-            crCtx.drawImage(nat, -nat.width*crScale/2, -nat.height*crScale/2,
-                            nat.width*crScale, nat.height*crScale);
+            crCtx.drawImage(nat, -crCanvas.width/2, -crCanvas.height/2, crCanvas.width, crCanvas.height);
             crCtx.restore();
 
             /* Draw crop overlay */
             const c=crState.crop, sc=crScale;
             const cx=c.x*sc, cy=c.y*sc, cw=c.w*sc, ch=c.h*sc;
-            drawCropOverlay(cx,cy,cw,ch);
-        }
-
-        function drawCropOverlay(cx, cy, cw, ch) {
-            const W=crOverlay.width, H=crOverlay.height;
-            crOCtx.clearRect(0,0,W,H);
-            /* Dark mask outside crop */
+            crOCtx.clearRect(0,0,crOverlay.width,crOverlay.height);
             crOCtx.fillStyle='rgba(0,0,0,0.5)';
-            crOCtx.fillRect(0,0,W,H);
+            crOCtx.fillRect(0,0,crOverlay.width,crOverlay.height);
             crOCtx.clearRect(cx,cy,cw,ch);
-            /* Crop border */
-            crOCtx.strokeStyle='#ff4444';
-            crOCtx.lineWidth=1.5;
+            crOCtx.strokeStyle='#ff4444'; crOCtx.lineWidth=2;
             crOCtx.strokeRect(cx,cy,cw,ch);
             /* Corner handles */
-            const hs=10;
-            crOCtx.fillStyle='#ff4444';
+            const hs=8;
             [[cx,cy],[cx+cw,cy],[cx,cy+ch],[cx+cw,cy+ch]].forEach(([hx,hy])=>{
+                crOCtx.fillStyle='#ff4444';
                 crOCtx.fillRect(hx-hs/2,hy-hs/2,hs,hs);
             });
-            /* Rule-of-thirds grid */
-            crOCtx.strokeStyle='rgba(255,255,255,0.2)';
-            crOCtx.lineWidth=0.5;
-            crOCtx.beginPath();
-            crOCtx.moveTo(cx+cw/3,cy); crOCtx.lineTo(cx+cw/3,cy+ch);
-            crOCtx.moveTo(cx+cw*2/3,cy); crOCtx.lineTo(cx+cw*2/3,cy+ch);
-            crOCtx.moveTo(cx,cy+ch/3); crOCtx.lineTo(cx+cw,cy+ch/3);
-            crOCtx.moveTo(cx,cy+ch*2/3); crOCtx.lineTo(cx+cw,cy+ch*2/3);
-            crOCtx.stroke();
         }
 
         function getHandle(mx, my) {
@@ -2760,28 +2734,20 @@
         }
 
         const wrap=$('crCanvasWrap');
-        function crClientXY(e){
-            return e.touches && e.touches.length
-                ? {cx:e.touches[0].clientX, cy:e.touches[0].clientY}
-                : {cx:e.clientX, cy:e.clientY};
-        }
-        function crDragStart(e){
+        wrap.addEventListener('mousedown',e=>{
             const r=crCanvas.getBoundingClientRect();
-            const {cx,cy}=crClientXY(e);
-            const mx=cx-r.left, my=cy-r.top;
+            const mx=e.clientX-r.left, my=e.clientY-r.top;
             const h=getHandle(mx,my);
             if(!h) return;
-            e.preventDefault();
             crState.dragging=true; crState.handle=h;
             crState.startMx=mx; crState.startMy=my;
             crState.startCrop={...crState.crop};
-        }
-        function crDragMove(e){
-            if(!crState.dragging) return;
             e.preventDefault();
+        });
+        window.addEventListener('mousemove',e=>{
+            if(!crState.dragging) return;
             const r=crCanvas.getBoundingClientRect();
-            const {cx,cy}=crClientXY(e);
-            const mx=cx-r.left, my=cy-r.top;
+            const mx=e.clientX-r.left, my=e.clientY-r.top;
             const dx=(mx-crState.startMx)/crScale, dy=(my-crState.startMy)/crScale;
             const sc=crState.startCrop;
             const nat=crImage;
@@ -2795,14 +2761,8 @@
             else if(crState.handle==='move'){ x=clamp(sc.x+dx,0,nat.width-sc.w); y=clamp(sc.y+dy,0,nat.height-sc.h); }
             crState.crop={x:Math.round(x),y:Math.round(y),w:Math.round(w),h:Math.round(h)};
             renderCrop();
-        }
-        function crDragEnd(){ crState.dragging=false; }
-        wrap.addEventListener('mousedown',  crDragStart);
-        wrap.addEventListener('touchstart', crDragStart, {passive:false});
-        window.addEventListener('mousemove', crDragMove);
-        window.addEventListener('touchmove', crDragMove, {passive:false});
-        window.addEventListener('mouseup',   crDragEnd);
-        window.addEventListener('touchend',  crDragEnd);
+        });
+        window.addEventListener('mouseup',()=>{ crState.dragging=false; });
 
         $('btnCrRot90').addEventListener('click',()=>{ crState.rotation=(crState.rotation+90)%360; crRot.value=crRotN.value=crState.rotation; renderCrop(); });
         $('btnCrRotN90').addEventListener('click',()=>{ crState.rotation=(crState.rotation-90+360)%360; crRot.value=crRotN.value=crState.rotation; renderCrop(); });
@@ -2881,7 +2841,7 @@
             if(bgRemoveLib) return bgRemoveLib;
             if(bgRemoveLoading) return null;
             bgRemoveLoading=true;
-            toast('Loading AI removal - requires internet...',3000);
+            toast('Loading AI background removal...',3000);
             return new Promise((resolve)=>{
                 const s=document.createElement('script');
                 /* Use @imgly/background-removal via CDN */
@@ -2939,7 +2899,7 @@
                     state.image._ggId=++state.imageIdCounter;
                     state.lanczosCache={imageId:null,pxW:0,pxH:0,data:null};
                     toast('OK Background removed!');
-                    btn.disabled=false; btn.textContent='Remove BG (needs internet)';
+                    btn.disabled=false; btn.textContent='Remove BG (AI) Remove BG (AI)';
                     queueProcess();
                 };
                 img.onerror=()=>{ URL.revokeObjectURL(url); throw new Error('Result decode failed'); };
@@ -2978,7 +2938,7 @@
                     state.image._ggId=++state.imageIdCounter;
                     state.lanczosCache={imageId:null,pxW:0,pxH:0,data:null};
                     toast('OK BG removed (threshold mode)');
-                    btn.disabled=false; btn.textContent='Remove BG (needs internet)';
+                    btn.disabled=false; btn.textContent='Remove BG (AI) Remove BG (AI)';
                     queueProcess();
                 };
                 img.src=url;

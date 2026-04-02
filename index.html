@@ -425,6 +425,7 @@
                     <label class="check-label">
                         <input type="checkbox" id="chkSimulate" tabindex="0">
                         Enable Burn Simulation
+                        <span class="sim-preview-label">preview only &mdash; export is always clean</span>
                     </label>
                 </div>
                 <div class="control-group">
@@ -858,8 +859,7 @@
             f.id = '_ggFooter';
             f.setAttribute('aria-hidden','true');
             f.style.cssText = [
-                'position:fixed','bottom:calc(60px + env(safe-area-inset-bottom))',
-                'left:0','right:0','z-index:9000',
+                'position:fixed','bottom:calc(60px + env(safe-area-inset-bottom))','left:0','right:0','z-index:9000',
                 'background:#0d0d0d','border-top:1px solid #1e1e1e',
                 'font-family:Space Mono,monospace','font-size:0.62rem',
                 'color:#444','text-align:center','padding:4px 10px',
@@ -875,8 +875,7 @@
             b.id = '_ggBanner';
             b.setAttribute('aria-hidden','true');
             b.style.cssText = [
-                'position:fixed','bottom:calc(60px + env(safe-area-inset-bottom))',
-                'left:0','right:0','z-index:9200',
+                'position:fixed','bottom:0','left:0','right:0','z-index:9001',
                 'background:#cc0000','color:#fff',
                 'font-family:Space Mono,monospace','font-size:0.72rem','font-weight:bold',
                 'text-align:center','padding:6px 40px 6px 16px',
