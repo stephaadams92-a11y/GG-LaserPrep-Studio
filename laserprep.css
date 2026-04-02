@@ -138,8 +138,6 @@ nav::after {
     padding: 7px 12px;
     align-items: center;
     scrollbar-width: none;
-    -webkit-mask-image: linear-gradient(to right, black 80%, transparent 100%);
-    mask-image: linear-gradient(to right, black 80%, transparent 100%);
 }
 .nav-buttons::-webkit-scrollbar { display: none; }
 
@@ -379,9 +377,9 @@ input[type="checkbox"] {
     align-items: center;
     touch-action: none;
     border-bottom: 1px solid var(--border);
-    height: 65vw;
-    min-height: 280px;
-    max-height: 58vh;
+    height: 55vw;
+    min-height: 240px;
+    max-height: 70vh;
 }
 .preview-container::before {
     content: '';
@@ -483,7 +481,7 @@ input[type="checkbox"] {
 /* ----- OVERLAY TOOLS ----- */
 .overlay-tools {
     position: absolute;
-    top: 8px; right: 8px;
+    bottom: 10px; right: 8px;
     display: flex;
     gap: 4px;
     z-index: 10;
@@ -1209,7 +1207,7 @@ button:disabled:hover {
     bottom: 0;
     left: 0;
     right: 0;
-    z-index: 500;
+    z-index: 9100;
     background: #0a0c12;
     border-top: 1px solid var(--accent);
     padding: 10px 16px;

@@ -459,7 +459,7 @@
                     <button id="btnVectorExp" class="btn-vector-exp" tabindex="0">Vector Export</button>
                     <button id="btnVectorTrace" class="btn-vector-trace" tabindex="0">🔷 Vector Trace</button>
                     <button id="btnCropRotate" class="btn-crop-rotate" tabindex="0">&#x2702;️ Crop &amp; Rotate</button>
-                    <button id="btnBgRemove" class="btn-bg-remove" tabindex="0">Remove BG (needs internet)</button>
+                    <button id="btnBgRemove" class="btn-bg-remove" tabindex="0">🪄 Remove BG (AI)</button>
                     <button id="btnGcodeExport" class="btn-gcode-export" tabindex="0">&#x2699; G-Code Export</button>
                 </div>
             </div>
@@ -858,7 +858,8 @@
             f.id = '_ggFooter';
             f.setAttribute('aria-hidden','true');
             f.style.cssText = [
-                'position:fixed','bottom:0','left:0','right:0','z-index:9000',
+                'position:fixed','bottom:calc(60px + env(safe-area-inset-bottom))',
+                'left:0','right:0','z-index:9000',
                 'background:#0d0d0d','border-top:1px solid #1e1e1e',
                 'font-family:Space Mono,monospace','font-size:0.62rem',
                 'color:#444','text-align:center','padding:4px 10px',
@@ -874,7 +875,8 @@
             b.id = '_ggBanner';
             b.setAttribute('aria-hidden','true');
             b.style.cssText = [
-                'position:fixed','bottom:0','left:0','right:0','z-index:9001',
+                'position:fixed','bottom:calc(60px + env(safe-area-inset-bottom))',
+                'left:0','right:0','z-index:9200',
                 'background:#cc0000','color:#fff',
                 'font-family:Space Mono,monospace','font-size:0.72rem','font-weight:bold',
                 'text-align:center','padding:6px 40px 6px 16px',
