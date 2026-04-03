@@ -69,7 +69,9 @@
         safeMode: false,      /* downscaled due to memory pressure */
         memoryWarned: false,
         /* Settings auto-persist */
-        settingsPersistDebounce: null
+        settingsPersistDebounce: null,
+        /* Suppress pipeline during bulk setting changes (presets, undo, material) */
+        _suppressQueue: false
     };
 
     /* ================================================================
@@ -218,17 +220,63 @@
        PIPELINE
     ================================================================ */
     let processDebounce;
+    let _sliderDragging = false;   /* true while any range input is being held */
+    let _dragDebounce;             /* fires full-res run after drag ends */
 
-    function queueProcess() {
+    function queueProcess(fromDrag) {
         if (!state.image) return;
+        if (state._suppressQueue) return;   /* inside a bulk settings change */
         clearTimeout(processDebounce);
+
+        /* Discard any previously queued-but-not-yet-dispatched payload.
+           This prevents stale jobs piling up when the worker is busy and
+           the user keeps moving sliders. */
+        state.workerQueue = [];
+        /* Clear a pending retry so it doesn't fire after we cancel. */
+        state.pendingProcess = false;
+
+        const delay = (fromDrag && _sliderDragging) ? 80 : 500;
+
         processDebounce = setTimeout(() => {
             if (state.isProcessing) {
+                /* Worker is mid-run. Park latest job; it will be dispatched
+                   as soon as the current run finishes (workerQueue drain). */
                 state.pendingProcess = true;
             } else {
-                runPipeline();
+                runPipeline(fromDrag && _sliderDragging);
             }
-        }, 280);
+        }, delay);
+    }
+
+    /* Called by slider pointerdown/touchstart to enter drag mode */
+    function _startDrag() { _sliderDragging = true; }
+
+    /* Called on pointerup/touchend — run full-res pipeline after drag ends */
+    function _endDrag() {
+        if (!_sliderDragging) return;
+        _sliderDragging = false;
+        clearTimeout(_dragDebounce);
+        _dragDebounce = setTimeout(() => {
+            state.workerQueue = [];
+            state.pendingProcess = false;
+            if (!state.isProcessing) runPipeline(false);
+            else state.pendingProcess = true;
+        }, 120);
+    }
+
+    /* Wrap any bulk settings change (preset, undo, material, auto-prep) so that
+       all the individual queueProcess() calls fired by input events and
+       dispatchEvent('change') are silently absorbed, then exactly ONE pipeline
+       run fires when the function returns.  Pass runAfter=false to skip the run
+       (useful if the caller will call queueProcess() itself with custom args). */
+    function batchSettings(fn, runAfter) {
+        state._suppressQueue = true;
+        try { fn(); } finally { state._suppressQueue = false; }
+        /* Clear any stale queue entries that may have snuck through */
+        clearTimeout(processDebounce);
+        state.workerQueue    = [];
+        state.pendingProcess = false;
+        if (runAfter !== false) queueProcess();
     }
 
     function updateSimIndicator() {
@@ -260,22 +308,32 @@
         }
         if (state.pendingProcess) {
             state.pendingProcess = false;
-            setTimeout(runPipeline, 0);
+            /* If slider is still being dragged, don't chain another full-res run.
+               _endDrag will fire one when the user releases. */
+            if (!_sliderDragging) setTimeout(runPipeline, 0);
         }
     }
 
-    function runPipeline() {
+    function runPipeline(livePreview) {
         if (!state.image || state.isProcessing) return;
         state.isProcessing = true;
         state.pendingProcess = false;
         loader.classList.add('visible');
-        updateProgressBar(0, 'Starting');
+        updateProgressBar(0, livePreview ? 'Preview…' : 'Starting');
 
         const w_mm = parseFloat($('imgWidth').value);
         const h_mm = parseFloat($('imgHeight').value);
         const dpi  = parseFloat($('imgDpiNum').value);
         let pxW  = Math.round((w_mm / 25.4) * dpi);
         let pxH  = Math.round((h_mm / 25.4) * dpi);
+
+        /* Live-drag preview: process at 40% resolution for instant feedback.
+           Full-res run fires automatically when the drag ends (_endDrag). */
+        if (livePreview) {
+            const scale = 0.4;
+            pxW = Math.max(64, Math.round(pxW * scale));
+            pxH = Math.max(64, Math.round(pxH * scale));
+        }
 
         /* Memory enforcement  -  may auto-adjust DPI and return false to retry */
         if (!checkAndEnforceMemoryLimit(pxW, pxH)) {
@@ -825,11 +883,13 @@
 
     function restoreAllSettings(saved) {
         if (!saved) return;
-        Object.entries(saved).forEach(([id,val])=>{
-            const el = $(id); if (!el) return;
-            if (el.type==='checkbox') el.checked = val; else el.value = val;
-        });
-        $('ditherSelect')?.dispatchEvent(new Event('change'));
+        batchSettings(() => {
+            Object.entries(saved).forEach(([id,val])=>{
+                const el = $(id); if (!el) return;
+                if (el.type==='checkbox') el.checked = val; else el.value = val;
+            });
+            $('ditherSelect')?.dispatchEvent(new Event('change'));
+        }, false); /* caller (undoAction/redoAction) calls queueProcess() itself */
     }
 
     function persistSettings() {
@@ -1390,8 +1450,12 @@
                 num.value = range.value;
                 flashBadge(range.value);
                 updateSliderTrack(range);
-                queueProcess();
+                queueProcess(true);
             });
+            range.addEventListener('pointerdown', _startDrag);
+            range.addEventListener('touchstart',  _startDrag, { passive: true });
+            range.addEventListener('pointerup',   _endDrag);
+            range.addEventListener('touchend',    _endDrag);
             num.addEventListener('input', () => {
                 range.value = num.value;
                 flashBadge(num.value);
@@ -1400,7 +1464,11 @@
             });
             updateSliderTrack(range);
         } else {
-            range.addEventListener('input', () => { num.value = range.value; queueProcess(); });
+            range.addEventListener('input', () => { num.value = range.value; queueProcess(true); });
+            range.addEventListener('pointerdown', _startDrag);
+            range.addEventListener('touchstart',  _startDrag, { passive: true });
+            range.addEventListener('pointerup',   _endDrag);
+            range.addEventListener('touchend',    _endDrag);
             num.addEventListener('input',   () => { range.value = num.value; queueProcess(); });
         }
     }
@@ -1409,33 +1477,34 @@
        APPLY PRESET HELPER
     ================================================================ */
     function applyPresetValues(values, label) {
-        const map = [
-            ['slGamma','valGamma','gamma'],['slCont','valCont','contrast'],
-            ['slBright','valBright','brightness'],['slBlack','valBlack','black'],
-            ['slWhite','valWhite','white'],['slSharp','valSharp','sharpen'],
-            ['slDenoise','valDenoise','denoise']
-        ];
-        map.forEach(([sid, vid, key]) => {
-            const sl = $(sid), vl = $(vid);
-            if (sl && vl && values[key] !== undefined) {
-                sl.value = vl.value = values[key];
+        batchSettings(() => {
+            const map = [
+                ['slGamma','valGamma','gamma'],['slCont','valCont','contrast'],
+                ['slBright','valBright','brightness'],['slBlack','valBlack','black'],
+                ['slWhite','valWhite','white'],['slSharp','valSharp','sharpen'],
+                ['slDenoise','valDenoise','denoise']
+            ];
+            map.forEach(([sid, vid, key]) => {
+                const sl = $(sid), vl = $(vid);
+                if (sl && vl && values[key] !== undefined) {
+                    sl.value = vl.value = values[key];
+                }
+            });
+            $('chkProtectHigh').checked = values.protectHigh;
+            $('chkHistEq').checked      = values.histEq;
+            $('chkInvert').checked      = values.invert;
+            $('chkSimulate').checked    = values.simulate;
+            $('chkLanczos').checked     = true;
+            $('ditherSelect').value     = values.dither;
+            $('ditherSelect').dispatchEvent(new Event('change'));
+            const matSel = $('materialSelect');
+            if (matSel && values.material) matSel.value = values.material;
+            if (values.localContrast !== undefined) {
+                const lcs = $('slLocalContrast'), lcv = $('valLocalContrast');
+                if (lcs && lcv) { lcs.value = lcv.value = values.localContrast; }
             }
         });
-        $('chkProtectHigh').checked = values.protectHigh;
-        $('chkHistEq').checked      = values.histEq;
-        $('chkInvert').checked      = values.invert;
-        $('chkSimulate').checked    = values.simulate;
-        $('chkLanczos').checked     = true;
-        $('ditherSelect').value     = values.dither;
-        $('ditherSelect').dispatchEvent(new Event('change'));
-        const matSel = $('materialSelect');
-        if (matSel && values.material) matSel.value = values.material;
-        if (values.localContrast !== undefined) {
-            const lcs = $('slLocalContrast'), lcv = $('valLocalContrast');
-            if (lcs && lcv) { lcs.value = lcv.value = values.localContrast; }
-        }
         toast(`${label} settings applied`);
-        queueProcess();
     }
 
     /* ================================================================
@@ -1456,17 +1525,18 @@
         const raw = localStorage.getItem('laserprep_settings');
         if (!raw) { toast('No saved config found'); return; }
         const s = JSON.parse(raw);
-        $('slBright').value  = $('valBright').value  = s.bright;
-        $('slCont').value    = $('valCont').value    = s.contrast;
-        $('slGamma').value   = $('valGamma').value   = s.gamma;
-        $('slSharp').value   = $('valSharp').value   = s.sharp;
-        $('slBlack').value   = $('valBlack').value   = s.black   || 0;
-        $('slWhite').value   = $('valWhite').value   = s.white   || 255;
-        $('slDenoise').value = $('valDenoise').value = s.denoise || 0;
-        $('ditherSelect').value = s.dither;
-        $('ditherSelect').dispatchEvent(new Event('change'));
+        batchSettings(() => {
+            $('slBright').value  = $('valBright').value  = s.bright;
+            $('slCont').value    = $('valCont').value    = s.contrast;
+            $('slGamma').value   = $('valGamma').value   = s.gamma;
+            $('slSharp').value   = $('valSharp').value   = s.sharp;
+            $('slBlack').value   = $('valBlack').value   = s.black   || 0;
+            $('slWhite').value   = $('valWhite').value   = s.white   || 255;
+            $('slDenoise').value = $('valDenoise').value = s.denoise || 0;
+            $('ditherSelect').value = s.dither;
+            $('ditherSelect').dispatchEvent(new Event('change'));
+        });
         toast('Config loaded');
-        queueProcess();
     }
 
     /* ================================================================
@@ -2023,28 +2093,24 @@
         const val = e.target.value;
         if (materialProfiles[val]) {
             const p = materialProfiles[val];
-            /* Apply the core profile values */
-            $('slGamma').value  = $('valGamma').value  = p.gamma;
-            $('slCont').value   = $('valCont').value   = p.contrast;
-            $('slBright').value = $('valBright').value = p.brightness;
-            $('ditherSelect').value = p.dither;
-            $('chkInvert').checked  = p.invert;
-            /* Reset all other controls to neutral so leftover slider state
-               from previous sessions or manual tweaks can't corrupt the
-               material's intended output. Simulate is kept off  -  it's a
-               preview tool, not part of the laser output. */
-            $('slSharp').value        = $('valSharp').value        = 0;
-            $('slDenoise').value      = $('valDenoise').value      = 0;
-            $('slNoise').value        = $('valNoise').value        = 0;
-            $('slLocalContrast').value= $('valLocalContrast').value= 0;
-            $('slBlack').value        = $('valBlack').value        = 0;
-            $('slWhite').value        = $('valWhite').value        = 255;
-            $('chkProtectHigh').checked = false;
-            $('chkHistEq').checked      = false;
-            $('chkSimulate').checked    = false;
-            $('ditherSelect').dispatchEvent(new Event('change'));
+            batchSettings(() => {
+                $('slGamma').value  = $('valGamma').value  = p.gamma;
+                $('slCont').value   = $('valCont').value   = p.contrast;
+                $('slBright').value = $('valBright').value = p.brightness;
+                $('ditherSelect').value = p.dither;
+                $('chkInvert').checked  = p.invert;
+                $('slSharp').value        = $('valSharp').value        = 0;
+                $('slDenoise').value      = $('valDenoise').value      = 0;
+                $('slNoise').value        = $('valNoise').value        = 0;
+                $('slLocalContrast').value= $('valLocalContrast').value= 0;
+                $('slBlack').value        = $('valBlack').value        = 0;
+                $('slWhite').value        = $('valWhite').value        = 255;
+                $('chkProtectHigh').checked = false;
+                $('chkHistEq').checked      = false;
+                $('chkSimulate').checked    = false;
+                $('ditherSelect').dispatchEvent(new Event('change'));
+            });
             toast(`Material: ${e.target.options[e.target.selectedIndex].text}`);
-            queueProcess();
         }
     });
 
@@ -2140,14 +2206,15 @@
 
     /* Auto Prep */
     $('btnAutoPrep').addEventListener('click', () => {
-        $('slBright').value = $('valBright').value = 5;
-        $('slCont').value   = $('valCont').value   = 15;
-        $('slSharp').value  = $('valSharp').value  = 50;
-        $('chkHistEq').checked = true;
-        $('ditherSelect').value = 'floyd';
-        $('ditherSelect').dispatchEvent(new Event('change'));
+        batchSettings(() => {
+            $('slBright').value = $('valBright').value = 5;
+            $('slCont').value   = $('valCont').value   = 15;
+            $('slSharp').value  = $('valSharp').value  = 50;
+            $('chkHistEq').checked = true;
+            $('ditherSelect').value = 'floyd';
+            $('ditherSelect').dispatchEvent(new Event('change'));
+        });
         toast('Auto Prep applied');
-        queueProcess();
     });
 
     /* Basswood Auto Prep */
@@ -2186,10 +2253,11 @@
             if(i>0) contrastSum+=Math.abs(v-imgData[i-4]);
         }
         brightness/=(imgData.length/4); contrastSum/=(imgData.length/4);
-        $('ditherSelect').value = contrastSum>45?'threshold':'jarvis';
-        $('ditherSelect').dispatchEvent(new Event('change'));
+        batchSettings(() => {
+            $('ditherSelect').value = contrastSum>45?'threshold':'jarvis';
+            $('ditherSelect').dispatchEvent(new Event('change'));
+        });
         toast('Perfect Engrave: analysed and applied');
-        queueProcess();
     });
 
     /* Calibration grid */
