@@ -695,7 +695,7 @@ input[type="checkbox"] {
     max-width: 600px;
     border-radius: var(--radius);
     border: 1px solid var(--border-hi);
-    overflow-y: auto;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
     max-height: 88vh;
@@ -739,6 +739,9 @@ input[type="checkbox"] {
     display: flex;
     flex-direction: column;
     gap: 18px;
+    overflow-y: auto;
+    flex: 1;
+    -webkit-overflow-scrolling: touch;
 }
 
 /* ----- SIMPLE MODE ----- */
