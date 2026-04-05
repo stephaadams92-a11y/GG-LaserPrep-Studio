@@ -2256,9 +2256,14 @@
     /* Perfect Engrave */
     $('btnPerfectEngrave').addEventListener('click', () => {
         if (!state.image) { toast('Import an image first'); return; }
-        const w=canvas.width, h=canvas.height;
-        if (!w||!h) { toast('Process an image first'); return; }
-        const imgData=ctx.getImageData(0,0,w,h).data;
+        /* FIX: read from state.processedImageData (clean pipeline output) not the
+           display canvas.  ctx.getImageData returns whatever is painted on screen,
+           which includes the burn-simulation blur when Simulate is active  -  that
+           artificially lowers contrast measurements and picks the wrong algorithm. */
+        if (!state.processedImageData || !state.processedImageW) {
+            toast('Process an image first'); return;
+        }
+        const imgData=state.processedImageData;
         let brightness=0, contrastSum=0;
         for(let i=0;i<imgData.length;i+=4){
             const v=imgData[i]; brightness+=v;

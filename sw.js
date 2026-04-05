@@ -1,12 +1,14 @@
-const CACHE_NAME = 'grainglow-cache-v1';
+const CACHE_NAME = 'grainglow-cache-v2';
 const FILES_TO_CACHE = [
     './index.html',
     './laserprep.css',
     './laserprep.js',
-    './laserprep-worker.js',
     './manifest.json',
     './icon-192.png',
     './icon-512.png'
+    /* laserprep-worker.js removed: worker is now inlined as a Blob URL in laserprep.js
+       and is never fetched as a separate file. Including it here would cause
+       cache.addAll() to fail if the file is absent, breaking SW install entirely. */
 ];
 
 // Install the service worker and cache all core files
