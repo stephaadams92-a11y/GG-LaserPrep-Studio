@@ -549,12 +549,19 @@
             /* -- DISPLAY: compose split / overlays on canvas for preview only -- */
             if (state.splitView && state.originalResizedData) {
                 const merged = new Uint8ClampedArray(displayData.length);
-                /* Sub-pixel alignment: use devicePixelRatio so divider is always
-                   exactly 1 physical pixel wide regardless of display scaling */
                 const dpr    = window.devicePixelRatio || 1;
-                const splitX = Math.round(w / 2);
-                /* Clamp divider to nearest physical pixel boundary */
-                const divX   = Math.round(splitX * dpr) / dpr;
+                /* Read the draggable slider position to determine split point */
+                let splitX;
+                const sliderLeft = parseFloat(splitSlider.style.left);
+                if (splitSlider.classList.contains('comparison-slider--visible') && !isNaN(sliderLeft)) {
+                    /* Convert container px position to canvas pixel coordinate */
+                    const containerW = container.clientWidth || w;
+                    splitX = Math.round((sliderLeft / containerW) * w);
+                } else {
+                    splitX = Math.round(w / 2);
+                }
+                splitX = Math.max(0, Math.min(w, splitX));
+                const divX = Math.round(splitX * dpr) / dpr;
                 for (let y=0; y<h; y++) {
                     for (let x=0; x<w; x++) {
                         const i = (y*w+x)*4;
@@ -1624,30 +1631,62 @@
 
     function drawHistogram() {
         if (!showHist || !histCanvas) return;
-        const pCtx = canvas.getContext('2d', { willReadFrequently: true });
-        if (!canvas.width) return;
-        let imgData;
-        try { imgData = pCtx.getImageData(0, 0, canvas.width, canvas.height); } catch(e) { return; }
-
-        const bins = new Float32Array(64);
-        const data = imgData.data;
-        for (let i=0; i<data.length; i+=4) {
-            const lum = Math.round((0.2126*data[i]+0.7152*data[i+1]+0.0722*data[i+2])/4);
-            if (lum < 64) bins[lum]++;
-        }
-        const max = Math.max(...bins, 1);
+        /* Always ensure canvas dimensions are set before drawing */
+        histCanvas.width  = 192;
+        histCanvas.height = 64;
+        const W = histCanvas.width, H = histCanvas.height;
         const hCtx = histCanvas.getContext('2d');
-        const W=histCanvas.width, H=histCanvas.height;
-        hCtx.clearRect(0, 0, W, H);
-        for (let b=0; b<64; b++) {
-            const bh = Math.round((bins[b]/max)*(H-2));
-            const bright = Math.round((b/63)*255);
-            hCtx.fillStyle = `rgb(${bright},${bright},${bright})`;
-            hCtx.fillRect(b*(W/64), H-bh, Math.ceil(W/64), bh);
+
+        /* Prefer clean processed data over canvas pixels (avoids overlay contamination) */
+        let data, pixelCount;
+        if (state.processedImageData && state.processedImageW) {
+            data       = state.processedImageData;
+            pixelCount = state.processedImageW * state.processedImageH;
+        } else {
+            if (!canvas.width || !canvas.height) return;
+            let imgData;
+            try { imgData = ctx.getImageData(0, 0, canvas.width, canvas.height); } catch(e) { return; }
+            data       = imgData.data;
+            pixelCount = canvas.width * canvas.height;
         }
-        hCtx.strokeStyle = 'rgba(255,68,68,0.5)';
+
+        /* 256-bin histogram */
+        const bins = new Float32Array(256);
+        for (let i = 0; i < data.length; i += 4) {
+            const lum = Math.round(0.2126*data[i] + 0.7152*data[i+1] + 0.0722*data[i+2]);
+            bins[Math.min(255, Math.max(0, lum))]++;
+        }
+
+        /* Normalise: log scale so small peaks are still visible */
+        const maxRaw = Math.max(...bins, 1);
+        const logMax = Math.log1p(maxRaw);
+
+        hCtx.clearRect(0, 0, W, H);
+        /* Background */
+        hCtx.fillStyle = 'rgba(0,0,0,0.75)';
+        hCtx.fillRect(0, 0, W, H);
+
+        /* Bars */
+        const barW = W / 256;
+        for (let b = 0; b < 256; b++) {
+            const bh = Math.round((Math.log1p(bins[b]) / logMax) * (H - 2));
+            if (bh < 1) continue;
+            const bright = b;
+            hCtx.fillStyle = `rgb(${bright},${bright},${bright})`;
+            hCtx.fillRect(Math.floor(b * barW), H - bh, Math.ceil(barW) + 1, bh);
+        }
+
+        /* Midpoint reference line */
+        hCtx.strokeStyle = 'rgba(255,68,68,0.6)';
         hCtx.lineWidth = 1;
         hCtx.beginPath(); hCtx.moveTo(W/2, 0); hCtx.lineTo(W/2, H); hCtx.stroke();
+
+        /* Axis labels */
+        hCtx.fillStyle = 'rgba(255,255,255,0.4)';
+        hCtx.font = '7px monospace';
+        hCtx.fillText('0', 2, H-2);
+        hCtx.fillText('128', W/2-8, H-2);
+        hCtx.fillText('255', W-18, H-2);
     }
 
     if (histBtn) {
@@ -1656,7 +1695,7 @@
             histBtn.classList.toggle('active-toggle', showHist);
             histBtn.setAttribute('aria-pressed', showHist);
             histCanvas.classList.toggle('hist-overlay--visible', showHist);
-            if (showHist) { histCanvas.width=96; histCanvas.height=48; drawHistogram(); }
+            if (showHist) drawHistogram();
         });
     }
 
@@ -1755,7 +1794,54 @@
         const rect = container.getBoundingClientRect();
         const x = Math.max(10, Math.min(rect.width - 10, e.clientX - rect.left));
         splitSlider.style.left = x + 'px';
+        /* Redraw split without re-running pipeline */
+        _redrawSplitView();
     });
+
+    /* Touch support for split slider */
+    splitSlider.addEventListener('touchstart', (e) => { draggingSlider = true; e.stopPropagation(); }, { passive: true });
+    window.addEventListener('touchend', () => draggingSlider = false);
+    window.addEventListener('touchmove', (e) => {
+        if (!draggingSlider || !state.splitView) return;
+        const rect = container.getBoundingClientRect();
+        const x = Math.max(10, Math.min(rect.width - 10, e.touches[0].clientX - rect.left));
+        splitSlider.style.left = x + 'px';
+        _redrawSplitView();
+    }, { passive: true });
+
+    /* Redraw the split view using already-processed data (no pipeline re-run) */
+    function _redrawSplitView() {
+        if (!state.splitView || !state.originalResizedData || !state.processedImageData) return;
+        const w = state.processedImageW;
+        const h = state.processedImageH;
+        const displayData = state.processedImageData;
+        const dpr = window.devicePixelRatio || 1;
+        let splitX;
+        const sliderLeft = parseFloat(splitSlider.style.left);
+        if (!isNaN(sliderLeft)) {
+            const containerW = container.clientWidth || w;
+            splitX = Math.round((sliderLeft / containerW) * w);
+        } else {
+            splitX = Math.round(w / 2);
+        }
+        splitX = Math.max(0, Math.min(w, splitX));
+        const merged = new Uint8ClampedArray(w * h * 4);
+        for (let y = 0; y < h; y++) {
+            for (let x = 0; x < w; x++) {
+                const i = (y*w+x)*4;
+                const src = x < splitX ? state.originalResizedData : displayData;
+                merged[i]   = src[i];
+                merged[i+1] = src[i+1];
+                merged[i+2] = src[i+2];
+                merged[i+3] = 255;
+            }
+        }
+        ctx.putImageData(new ImageData(merged, w, h), 0, 0);
+        ctx.fillStyle = '#ff4444';
+        const divX = Math.round(splitX * dpr) / dpr;
+        ctx.fillRect(divX - (0.5/dpr), 0, 1/dpr, h);
+        applyOverlays();
+    }
 
     /* ================================================================
        EDGE ENGRAVE (Sobel)
@@ -2014,7 +2100,7 @@
     })();
 
     /* ================================================================
-       SCAN ANIMATION
+       SCAN ANIMATION  -  simulates laser head scanning across the image
     ================================================================ */
     let scanRunning = false;
     $('btnScanPreview').addEventListener('click', function () {
@@ -2040,30 +2126,87 @@
             container.appendChild(scanOverlay);
         }
         const oCtx = scanOverlay.getContext('2d');
-        scanOverlay.width = container.clientWidth;
+        scanOverlay.width  = container.clientWidth;
         scanOverlay.height = container.clientHeight;
+
+        const totalH   = scanOverlay.height;
+        const totalW   = scanOverlay.width;
+        const self     = this;
+
+        /* Scan parameters: slow enough to be meaningful */
+        const SCAN_SPEED_PX_PER_TICK = 1;   /* 1px per frame = ~16px/sec at 60fps */
+        const TICK_MS                = 16;  /* ~60fps */
+        const BEAM_HEIGHT            = 3;   /* glow radius */
+        const MAX_PASSES             = 3;
+
         let y = 0;
-        const self = this;
-        const interval = setInterval(() => {
-            if (!scanRunning) { clearInterval(interval); oCtx.clearRect(0,0,scanOverlay.width,scanOverlay.height); return; }
-            oCtx.clearRect(0, 0, scanOverlay.width, scanOverlay.height);
-            const grad = oCtx.createLinearGradient(0, y-4, 0, y+4);
-            grad.addColorStop(0, 'rgba(255,68,68,0)');
-            grad.addColorStop(0.5, 'rgba(255,68,68,0.7)');
-            grad.addColorStop(1, 'rgba(255,68,68,0)');
-            oCtx.fillStyle = grad;
-            oCtx.fillRect(0, y-4, scanOverlay.width, 8);
-            oCtx.fillStyle = 'rgba(255,180,180,0.9)';
-            oCtx.fillRect(0, y, scanOverlay.width, 1);
-            y += 3;
-            if (y > scanOverlay.height) {
-                clearInterval(interval);
-                oCtx.clearRect(0,0,scanOverlay.width,scanOverlay.height);
-                scanRunning = false;
-                self.classList.remove('active-toggle');
-                self.setAttribute('aria-pressed', 'false');
+        let pass = 0;
+        let direction = 1;  /* 1=down, -1=up (serpentine) */
+        let headX = 0;
+
+        function drawScanLine() {
+            if (!scanRunning) {
+                oCtx.clearRect(0, 0, totalW, totalH);
+                return;
             }
-        }, 12);
+            oCtx.clearRect(0, 0, totalW, totalH);
+
+            /* Serpentine head position */
+            headX = direction === 1
+                ? (y / totalH) * totalW
+                : totalW - (y / totalH) * totalW;
+
+            /* Soft glow beam */
+            const grad = oCtx.createLinearGradient(0, y - BEAM_HEIGHT * 2, 0, y + BEAM_HEIGHT * 2);
+            grad.addColorStop(0,   'rgba(255,68,68,0)');
+            grad.addColorStop(0.4, 'rgba(255,100,100,0.35)');
+            grad.addColorStop(0.5, 'rgba(255,68,68,0.75)');
+            grad.addColorStop(0.6, 'rgba(255,100,100,0.35)');
+            grad.addColorStop(1,   'rgba(255,68,68,0)');
+            oCtx.fillStyle = grad;
+            oCtx.fillRect(0, y - BEAM_HEIGHT * 2, totalW, BEAM_HEIGHT * 4);
+
+            /* Bright core line */
+            oCtx.fillStyle = 'rgba(255,220,220,0.95)';
+            oCtx.fillRect(0, y, totalW, 1);
+
+            /* Laser head dot */
+            oCtx.beginPath();
+            oCtx.arc(headX, y, 4, 0, Math.PI * 2);
+            oCtx.fillStyle = 'rgba(255,255,255,0.9)';
+            oCtx.fill();
+            oCtx.beginPath();
+            oCtx.arc(headX, y, 2, 0, Math.PI * 2);
+            oCtx.fillStyle = '#ff4444';
+            oCtx.fill();
+
+            /* Pass counter */
+            oCtx.fillStyle = 'rgba(255,68,68,0.7)';
+            oCtx.font = '9px monospace';
+            oCtx.fillText(`Pass ${pass + 1}/${MAX_PASSES}`, 6, 14);
+
+            y += SCAN_SPEED_PX_PER_TICK;
+
+            if (y > totalH) {
+                pass++;
+                if (pass >= MAX_PASSES) {
+                    /* Done */
+                    oCtx.clearRect(0, 0, totalW, totalH);
+                    scanRunning = false;
+                    self.classList.remove('active-toggle');
+                    self.setAttribute('aria-pressed', 'false');
+                    toast('Scan complete (' + MAX_PASSES + ' passes)');
+                    return;
+                }
+                /* Next pass: flip direction (serpentine) */
+                direction = -direction;
+                y = 0;
+            }
+
+            setTimeout(drawScanLine, TICK_MS);
+        }
+
+        drawScanLine();
     });
 
     /* ================================================================
@@ -2173,6 +2316,10 @@
         this.setAttribute('aria-pressed', state.splitView);
         $('splitLabel').classList.toggle('split-label--visible', state.splitView);
         splitSlider.classList.toggle('comparison-slider--visible', state.splitView);
+        if (state.splitView) {
+            /* Centre the slider when activating */
+            splitSlider.style.left = Math.round(container.clientWidth / 2) + 'px';
+        }
         runPipeline();
     });
 
