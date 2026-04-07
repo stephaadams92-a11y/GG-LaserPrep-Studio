@@ -1,8 +1,8 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <!--
   +==================================================================+
   |           Grain & Glow Studio                                    |
-  |           &copy; 2026 Stephanie Adams. All Rights Reserved.           |
+  |           © 2026 Stephanie Adams. All Rights Reserved.           |
   |                                                                  |
   |  This software is the exclusive intellectual property of         |
   |  Stephanie Adams. Unauthorised copying, redistribution,          |
@@ -19,16 +19,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="author" content="Stephanie Adams">
-    <meta name="copyright" content="&copy; 2026 Stephanie Adams. All Rights Reserved.">
-    <meta name="description" content="Grain &amp; Glow Studio &mdash; Image preparation tool for laser engraving. Created by Stephanie Adams.">
+    <meta name="copyright" content="© 2026 Stephanie Adams. All Rights Reserved.">
+    <meta name="description" content="Grain &amp; Glow Studio — Image preparation tool for laser engraving. Created by Stephanie Adams.">
     <meta property="og:title" content="Grain &amp; Glow Studio by Stephanie Adams">
-    <meta property="og:description" content="Professional laser engraving image preparation tool. &copy; 2026 Stephanie Adams.">
+    <meta property="og:description" content="Professional laser engraving image preparation tool. © 2026 Stephanie Adams.">
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0d0d0d">
+    <meta name="theme-color" content="#0b0d12">
     <title>Grain &amp; Glow Studio</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
     <link rel="apple-touch-icon" href="icon-192.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -38,77 +38,43 @@
 </head>
 <body>
 
-<!-- =================================================== NAV =========== -->
+<!-- ═══════════════════════════════════════ TOP NAV ════════════════ -->
 <nav role="navigation" aria-label="Main toolbar">
-    <div class="nav-top">
-        <div class="nav-logo" aria-label="Grain &amp; Glow Studio">
-            <div class="nav-logo-icon" aria-hidden="true">
-                <svg viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <rect x="1" y="1" width="20" height="20" rx="3" stroke="#ff4444" stroke-width="1.2" fill="none"/>
-                    <line x1="3" y1="11" x2="19" y2="11" stroke="#ff4444" stroke-width="0.8" opacity="0.3" class="laser-beam"/>
-                    <circle cx="11" cy="11" r="2.5" fill="none" stroke="#ff4444" stroke-width="1.2"/>
-                    <line x1="11" y1="1" x2="11" y2="5.5" stroke="#ff4444" stroke-width="0.8" opacity="0.5"/>
-                    <line x1="11" y1="16.5" x2="11" y2="21" stroke="#ff4444" stroke-width="0.8" opacity="0.5"/>
-                    <circle cx="11" cy="11" r="1" fill="#ff4444" class="logo-pulse"/>
-                </svg>
-            </div>
-            GRAIN &amp; GLOW STUDIO
-            <span class="nav-version">v7</span>
+    <div class="nav-logo" aria-label="Grain &amp; Glow Studio">
+        <div class="nav-logo-icon" aria-hidden="true">
+            <svg viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="1" y="1" width="20" height="20" rx="3" stroke="#ff4444" stroke-width="1.2" fill="none"/>
+                <line x1="3" y1="11" x2="19" y2="11" stroke="#ff4444" stroke-width="0.8" opacity="0.3" class="laser-beam"/>
+                <circle cx="11" cy="11" r="2.5" fill="none" stroke="#ff4444" stroke-width="1.2"/>
+                <line x1="11" y1="1" x2="11" y2="5.5" stroke="#ff4444" stroke-width="0.8" opacity="0.5"/>
+                <line x1="11" y1="16.5" x2="11" y2="21" stroke="#ff4444" stroke-width="0.8" opacity="0.5"/>
+                <circle cx="11" cy="11" r="1" fill="#ff4444" class="logo-pulse"/>
+            </svg>
         </div>
-        <div class="nav-top-actions">
-            <label class="btn primary" title="Import image from gallery"
-                   tabindex="0" role="button" aria-label="Import image file">
-                + Import
-                <input type="file" id="fileInput" accept="image/png,image/jpeg,image/webp"
-                       aria-label="Choose image file">
-            </label>
-            <button id="btnCamera" class="btn-cyan" tabindex="0">📷</button>
-        </div>
+        GRAIN &amp; GLOW
+        <span class="nav-version">v7</span>
     </div>
-
-    <div class="nav-buttons" id="nav-buttons-container" role="toolbar" aria-label="Quick actions">
-        <button id="btnSimpleMode" class="btn-green" tabindex="0">⚡ Simple</button>
-        <button id="btnAutoPrep"   class="btn-blue"  tabindex="0">Auto Prep</button>
-        <button id="btnSmartMdf"   class="btn-smart-mdf" tabindex="0">Smart MDF</button>
-        <button id="btnBasswoodAutoPrep" class="btn-amber" tabindex="0">🪵 Basswood</button>
-        <div class="nav-divider" role="separator"></div>
-        <button id="btnPerfectEngrave" class="btn-purple" tabindex="0">Perfect Engrave</button>
-        <div class="nav-divider" role="separator"></div>
-        <button id="btnCalibGrid" tabindex="0">Calib Grid</button>
-        <button id="btnHqMode" class="btn-cyan" tabindex="0">HQ Mode</button>
-        <button id="btnReset" tabindex="0">&#x21BA; Reset</button>
-        <div class="nav-divider" role="separator"></div>
-        <button id="btnUndo" tabindex="0" disabled aria-label="Undo (Ctrl+Z)" title="Undo (Ctrl+Z)">&#x21A9;</button>
-        <button id="btnRedo" tabindex="0" disabled aria-label="Redo (Ctrl+Y)" title="Redo (Ctrl+Y)">&#x21AA;</button>
-        <div class="nav-divider" role="separator"></div>
-        <label class="btn btn-blue" tabindex="0" role="button"
-               aria-label="Batch process multiple images" title="Batch process multiple images">
-            &#x29C9; Batch
-            <input type="file" id="batchFileInput" accept="image/png,image/jpeg,image/webp"
-                   multiple aria-label="Select images for batch processing">
+    <div class="nav-actions">
+        <label class="btn-import" title="Import image" tabindex="0" role="button" aria-label="Import image file">
+            + Import
+            <input type="file" id="fileInput" accept="image/png,image/jpeg,image/webp" aria-label="Choose image file">
         </label>
+        <button id="btnCamera" class="btn-cam" tabindex="0" aria-label="Open camera">📷</button>
     </div>
 </nav>
 
-<!-- BATCH PROGRESS BAR (hidden until batch active) -->
-<div id="batchProgressTrack" role="progressbar" aria-label="Batch processing progress"
-     aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"
-     style="height:3px;background:var(--bg-panel);display:none;">
-    <div id="batchProgressBar" style="height:100%;width:0%;background:var(--cyan);transition:width 0.3s;"></div>
-</div>
-
-<!-- FIXED EXPORT BAR -->
-<div id="exportBar" role="toolbar" aria-label="Export">
-    <button class="primary" id="btnExport" tabindex="0" aria-label="Export processed image as PNG">
-        &#x2B07; Export PNG
-    </button>
-</div>
-
-<!-- =============================================== WORKSPACE ========= -->
+<!-- ═══════════════════════════════════════ WORKSPACE ══════════════ -->
 <main class="workspace" role="main">
 
-    <!-- PREVIEW -->
+    <!-- BATCH PROGRESS -->
+    <div id="batchProgressTrack" role="progressbar" aria-label="Batch processing progress"
+         aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+        <div id="batchProgressBar"></div>
+    </div>
+
+    <!-- PREVIEW AREA -->
     <div class="preview-container" id="previewContainer">
+
         <div class="drop-hint" id="dropHint" aria-hidden="true">
             <svg viewBox="0 0 56 56" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true">
                 <rect x="8" y="8" width="40" height="40" rx="5" stroke-dasharray="3 3"/>
@@ -116,7 +82,7 @@
                 <circle cx="28" cy="44" r="2" fill="currentColor" opacity="0.4"/>
             </svg>
             <div class="drop-hint-title">DROP IMAGE HERE</div>
-            <div class="drop-hint-sub">or use Import / Camera above</div>
+            <div class="drop-hint-sub">or tap Import above</div>
         </div>
 
         <div class="loader" id="loader" role="status" aria-live="polite" aria-label="Processing image">
@@ -126,96 +92,82 @@
                 <div class="progress-bar-fill" id="progressBarFill"></div>
             </div>
             <div class="progress-label" id="progressLabel"></div>
-            <div class="processing-note">Large images may take up to 60 seconds &mdash; please wait</div>
+            <div class="processing-note">Large images may take up to 60 seconds — please wait</div>
         </div>
 
-        <div class="split-label" id="splitLabel" aria-hidden="true">&#x25C0; ORIGINAL  |  PROCESSED &#x25B6;</div>
+        <div class="split-label" id="splitLabel" aria-hidden="true">◀ ORIGINAL  |  PROCESSED ▶</div>
         <div class="img-stats" id="imgStats" aria-live="polite" aria-label="Image statistics"></div>
 
         <canvas id="previewCanvas" tabindex="0"></canvas>
-
-        <div class="overlay-tools" role="toolbar" aria-label="Preview tools">
-            <button id="btnSplitView" tabindex="0">A/B</button>
-            <button id="btnToggleZoom" tabindex="0">1:1</button>
-            <div class="tool-divider" role="separator"></div>
-            <button id="btnToggleGrid" tabindex="0">Grid</button>
-            <button id="btnToggleLines" tabindex="0">Lines</button>
-            <button id="btnScanPreview" tabindex="0">Scan</button>
-            <div class="tool-divider" role="separator"></div>
-            <button id="btnToggleHist" tabindex="0">Hist</button>
-            <button id="btnKbHelp" tabindex="0">&#x2328;</button>
-            <button id="btnHelp" class="btn-cyan" tabindex="0" aria-label="Help and guide">?</button>
-        </div>
-
         <canvas id="histOverlay" aria-hidden="true"></canvas>
+
+        <!-- Preview overlay tools -->
+        <div class="overlay-tools" role="toolbar" aria-label="Preview tools">
+            <button id="btnSplitView" tabindex="0" aria-label="A/B split view">A/B</button>
+            <button id="btnToggleZoom" tabindex="0" aria-label="Toggle zoom 1:1">1:1</button>
+            <div class="tool-divider" role="separator"></div>
+            <button id="btnToggleGrid" tabindex="0" aria-label="Toggle grid">Grid</button>
+            <button id="btnToggleLines" tabindex="0" aria-label="Toggle scan lines">Lines</button>
+            <button id="btnScanPreview" tabindex="0" aria-label="Laser scan preview">Scan</button>
+            <div class="tool-divider" role="separator"></div>
+            <button id="btnToggleHist" tabindex="0" aria-label="Toggle histogram">Hist</button>
+            <button id="btnKbHelp" tabindex="0" aria-label="Keyboard shortcuts">⌨</button>
+            <button id="btnHelp" class="btn-cyan" tabindex="0" aria-label="Help">?</button>
+        </div>
 
         <div class="zoom-slider-overlay" id="zoomSliderOverlay" aria-label="Zoom level">
             <input type="range" min="0.1" max="10" step="0.1" value="1" id="zoomSlider"
                    aria-label="Zoom level" tabindex="0">
         </div>
+
+    </div><!-- /preview-container -->
+
+</main><!-- /workspace -->
+
+
+<!-- ═══════════════════════════════════════════ DRAWERS ════════════ -->
+
+<!-- ── PRESETS DRAWER ─────────────────────────────────────────────── -->
+<div class="drawer" id="drawerPresets" role="region" aria-label="Presets">
+    <div class="drawer-handle" id="handlePresets"></div>
+    <div class="drawer-header">
+        <span class="drawer-title green">⚡ Presets &amp; Setup</span>
+        <button class="drawer-close" id="closePresets" aria-label="Close">✕</button>
     </div>
+    <div class="drawer-body">
 
-    <!-- CONTROLS PANEL -->
-    <div class="controls" id="controlsPanel" role="region" aria-label="Processing controls">
-
-        <!-- SIZE & SCALING -->
-        <div class="section" data-type="size">
+        <!-- Size & material always shown at top of presets -->
+        <div class="section">
             <div class="section-title" role="button" aria-expanded="true" tabindex="0">
                 <span class="section-title-inner">
-                    <span class="section-dot" aria-hidden="true"></span>Size &amp; Scaling
+                    <span class="section-dot" aria-hidden="true"></span>Size &amp; Material
                 </span>
-                <span class="chev" aria-hidden="true">&#x25BC;</span>
+                <span class="chev">▼</span>
             </div>
             <div class="section-body">
-                <div class="grid-2">
+                <div class="size-row">
                     <div class="control-group">
-                        <div class="control-header"><label for="imgWidth">Width (mm)</label></div>
-                        <input type="number" id="imgWidth" value="100"
-                               aria-label="Engraving width in millimetres" tabindex="0">
+                        <div class="field-label">Width (mm)</div>
+                        <input type="number" id="imgWidth" value="100" aria-label="Engraving width in millimetres" tabindex="0">
                     </div>
                     <div class="control-group">
-                        <div class="control-header"><label for="imgHeight">Height (mm)</label></div>
-                        <input type="number" id="imgHeight" value="100"
-                               aria-label="Engraving height in millimetres" tabindex="0">
+                        <div class="field-label">Height (mm)</div>
+                        <input type="number" id="imgHeight" value="100" aria-label="Engraving height in millimetres" tabindex="0">
                     </div>
                 </div>
                 <div class="control-group">
                     <div class="control-header">
                         <label for="imgDpiNum">DPI</label>
-                        <input type="number" id="imgDpiNum" value="300" min="100" max="1200"
-                               aria-label="DPI value" tabindex="0">
+                        <input type="number" id="imgDpiNum" value="300" min="100" max="1200" aria-label="DPI value" tabindex="0">
                     </div>
-                    <input type="range" id="imgDpi" min="100" max="1200" step="50" value="300"
-                           aria-label="DPI slider" tabindex="0">
+                    <input type="range" id="imgDpi" min="100" max="1200" step="50" value="300" aria-label="DPI slider" tabindex="0">
                 </div>
+                <label class="check-label">
+                    <input type="checkbox" id="lockRatio" checked tabindex="0">
+                    Lock Aspect Ratio
+                </label>
                 <div class="control-group">
-                    <label class="check-label">
-                        <input type="checkbox" id="chkLanczos" checked tabindex="0">
-                        Enable Mitchell-Netravali Resizing
-                    </label>
-                    <label class="check-label">
-                        <input type="checkbox" id="chkCatmullRom" tabindex="0"
-                               aria-label="Use Catmull-Rom (sharper, better for text and line art)">
-                        Catmull-Rom mode (sharper edges &mdash; text &amp; line art)
-                    </label>
-                    <label class="check-label">
-                        <input type="checkbox" id="lockRatio" checked tabindex="0">
-                        Lock Aspect Ratio
-                    </label>
-                </div>
-            </div>
-        </div>
-
-        <!-- MATERIAL & PROFILE -->
-        <div class="section" data-type="material">
-            <div class="section-title" role="button" aria-expanded="true" tabindex="0">
-                <span class="section-title-inner">
-                    <span class="section-dot" aria-hidden="true"></span>Material &amp; Profile
-                </span>
-                <span class="chev" aria-hidden="true">&#x25BC;</span>
-            </div>
-            <div class="section-body">
-                <div class="control-group">
+                    <div class="field-label">Material</div>
                     <select id="materialSelect" tabindex="0">
                         <option value="custom">Custom Settings</option>
                         <optgroup label="Organic">
@@ -242,233 +194,339 @@
             </div>
         </div>
 
-        <!-- ENHANCEMENTS & CLIPPING -->
-        <div class="section collapsed" data-type="enhance">
-            <div class="section-title" role="button" aria-expanded="false" tabindex="0">
+        <!-- One-tap presets -->
+        <div class="section">
+            <div class="section-title" role="button" aria-expanded="true" tabindex="0">
                 <span class="section-title-inner">
-                    <span class="section-dot" aria-hidden="true"></span>Enhancements &amp; Clipping
+                    <span class="section-dot" aria-hidden="true"></span>One-Tap Presets
                 </span>
-                <span class="chev" aria-hidden="true">&#x25BC;</span>
+                <span class="chev">▼</span>
             </div>
             <div class="section-body">
-                <div class="control-group">
-                    <div class="control-header">
-                        <label for="slBlack">Black Point</label>
-                        <input type="number" id="valBlack" value="0" aria-label="Black point value" tabindex="0">
-                    </div>
-                    <input type="range" id="slBlack" min="0" max="100" value="0"
-                           aria-label="Black point slider" tabindex="0">
-                </div>
-                <div class="control-group">
-                    <div class="control-header">
-                        <label for="slWhite">White Point</label>
-                        <input type="number" id="valWhite" value="255" aria-label="White point value" tabindex="0">
-                    </div>
-                    <input type="range" id="slWhite" min="150" max="255" value="255"
-                           aria-label="White point slider" tabindex="0">
-                </div>
-                <div class="control-group">
-                    <div class="control-header">
-                        <label for="slBright">Brightness</label>
-                        <input type="number" id="valBright" value="0" aria-label="Brightness value" tabindex="0">
-                    </div>
-                    <input type="range" id="slBright" min="-100" max="100" value="0"
-                           aria-label="Brightness slider" tabindex="0">
-                </div>
-                <div class="control-group">
-                    <div class="control-header">
-                        <label for="slCont">Contrast</label>
-                        <input type="number" id="valCont" value="0" aria-label="Contrast value" tabindex="0">
-                    </div>
-                    <input type="range" id="slCont" min="-100" max="100" value="0"
-                           aria-label="Contrast slider" tabindex="0">
-                </div>
-                <div class="control-group">
-                    <div class="control-header">
-                        <label for="slGamma">Gamma</label>
-                        <input type="number" id="valGamma" value="1" step="0.1" aria-label="Gamma value" tabindex="0">
-                    </div>
-                    <input type="range" id="slGamma" min="0.1" max="3" step="0.1" value="1"
-                           aria-label="Gamma slider" tabindex="0">
-                </div>
-                <div class="control-group">
-                    <div class="control-header">
-                        <label for="slSharp">Sharpen (USM)</label>
-                        <input type="number" id="valSharp" value="0" aria-label="Sharpen value" tabindex="0">
-                    </div>
-                    <input type="range" id="slSharp" min="0" max="100" value="0"
-                           aria-label="Sharpen slider" tabindex="0">
-                </div>
-                <div class="control-group usm-detail-controls">
-                    <div class="control-header">
-                        <label for="selUsmRadius">USM Radius</label>
-                        <select id="selUsmRadius" aria-label="Unsharp mask blur radius" tabindex="0"
-                                style="width:auto;min-width:80px;padding:3px 22px 3px 7px;font-size:0.72rem;">
-                            <option value="1">1px (fine)</option>
-                            <option value="2" selected>2px (balanced)</option>
-                            <option value="3">3px (broad)</option>
-                        </select>
-                    </div>
-                    <div class="control-header" style="margin-top:4px;">
-                        <label for="valUsmThresh">USM Threshold</label>
-                        <input type="number" id="valUsmThresh" value="0" min="0" max="255"
-                               aria-label="Unsharp mask threshold &mdash; skip pixels with contrast below this value (0=sharpen everything, like GIMP default)"
-                               title="0 = sharpen all pixels (GIMP default). Raise to avoid sharpening noise in smooth areas."
-                               tabindex="0" style="width:52px;padding:3px 6px;font-size:0.72rem;">
-                    </div>
-                </div>
-                <div class="control-group">
-                    <div class="control-header">
-                        <label for="slLocalContrast">Local Contrast</label>
-                        <input type="number" id="valLocalContrast" value="0" aria-label="Local contrast value" tabindex="0">
-                    </div>
-                    <input type="range" id="slLocalContrast" min="0" max="100" value="0"
-                           aria-label="Local contrast slider" tabindex="0">
-                </div>
-                <div class="control-group">
-                    <div class="control-header">
-                        <label for="slNoise" title="Gaussian blur strength &mdash; smooths film grain and texture noise before processing. Separate from Median Denoise below.">Noise Redux (Gaussian)</label>
-                        <input type="number" id="valNoise" value="0" aria-label="Noise reduction value" tabindex="0">
-                    </div>
-                    <input type="range" id="slNoise" min="0" max="50" value="0"
-                           aria-label="Noise reduction slider" tabindex="0">
-                </div>
-                <div class="control-group">
-                    <div class="control-header">
-                        <label for="slDenoise" title="Spatial median filter &mdash; removes salt-and-pepper / impulse noise while preserving edges better than Gaussian blur.">Median Denoise (Edge-safe)</label>
-                        <input type="number" id="valDenoise" value="0" aria-label="Median denoise value" tabindex="0">
-                    </div>
-                    <input type="range" id="slDenoise" min="0" max="5" value="0"
-                           aria-label="Median denoise slider" tabindex="0">
-                </div>
-                <div class="control-group">
-                    <label class="check-label">
-                        <input type="checkbox" id="chkProtectHigh" tabindex="0">
-                        Protect Highlights
-                    </label>
-                    <label class="check-label">
-                        <input type="checkbox" id="chkHistEq" tabindex="0">
-                        Histogram Equalization
-                    </label>
+                <div class="preset-grid">
+                    <button id="btnSimpleMode" class="preset-btn-big btn-green" style="border-color:rgba(0,230,118,0.3);" tabindex="0">
+                        <span class="picon">⚡</span>
+                        <span class="pname">Simple</span>
+                        <span class="pdesc">guided wizard</span>
+                    </button>
+                    <button id="btnAutoPrep" class="preset-btn-big btn-blue" style="border-color:rgba(74,158,255,0.3);" tabindex="0">
+                        <span class="picon">🔧</span>
+                        <span class="pname">Auto Prep</span>
+                        <span class="pdesc">balanced start</span>
+                    </button>
+                    <button id="btnSmartMdf" class="preset-btn-big btn-smart-mdf" style="border-radius:var(--radius-sm);" tabindex="0">
+                        <span class="picon">📊</span>
+                        <span class="pname">Smart MDF</span>
+                        <span class="pdesc">AI-analysed</span>
+                    </button>
+                    <button id="btnBasswoodAutoPrep" class="preset-btn-big btn-amber" style="border-color:rgba(255,170,0,0.3);" tabindex="0">
+                        <span class="picon">🪵</span>
+                        <span class="pname">Basswood</span>
+                        <span class="pdesc">pale wood</span>
+                    </button>
+                    <button id="btnPerfectEngrave" class="preset-btn-big btn-purple" style="border-color:rgba(192,132,252,0.3);" tabindex="0">
+                        <span class="picon">✨</span>
+                        <span class="pname">Perfect</span>
+                        <span class="pdesc">auto-analyse</span>
+                    </button>
+                    <button id="btnHqMode" class="preset-btn-big btn-cyan" style="border-color:rgba(34,211,238,0.3);" tabindex="0">
+                        <span class="picon">🔍</span>
+                        <span class="pname">HQ Mode</span>
+                        <span class="pdesc">2× DPI</span>
+                    </button>
                 </div>
             </div>
         </div>
 
-        <!-- DITHERING -->
-        <div class="section collapsed" data-type="dither">
+        <!-- Utility -->
+        <div class="section collapsed">
             <div class="section-title" role="button" aria-expanded="false" tabindex="0">
                 <span class="section-title-inner">
-                    <span class="section-dot" aria-hidden="true"></span>Dithering &amp; Adaptive Output
+                    <span class="section-dot" aria-hidden="true"></span>Utilities
                 </span>
-                <span class="chev" aria-hidden="true">&#x25BC;</span>
-            </div>
-            <div class="section-body">
-                <div class="control-group">
-                    <select id="ditherSelect" tabindex="0">
-                        <option value="none">None (Grayscale)</option>
-                        <option value="adaptive">Adaptive Error Diffusion</option>
-                        <optgroup label="Error Diffusion">
-                            <option value="floyd" selected>Floyd-Steinberg</option>
-                            <option value="jarvis">Jarvis-Judice-Ninke</option>
-                            <option value="stucki">Stucki</option>
-                            <option value="atkinson">Atkinson</option>
-                            <option value="riemersma">Riemersma (Worm-Free &#x2713;)</option>
-                        </optgroup>
-                        <optgroup label="Ordered">
-                            <option value="bayer2">Bayer 2&times;2</option>
-                            <option value="bayer4">Bayer 4&times;4</option>
-                            <option value="bayer8">Bayer 8&times;8</option>
-                        </optgroup>
-                        <optgroup label="Halftone &amp; Threshold">
-                            <option value="halftone">True Halftone</option>
-                            <option value="halftone_lines">Halftone Lines</option>
-                            <option value="halftone_crosshatch">Halftone Crosshatch</option>
-                            <option value="threshold">Pure 1-bit Threshold</option>
-                        </optgroup>
-                    </select>
-                </div>
-                <div class="control-group ctrl-hidden" id="halftoneControls" aria-hidden="true">
-                    <div class="control-header">
-                        <label for="slDot">Halftone Dot Size</label>
-                        <input type="number" id="valDot" value="3" aria-label="Halftone dot size value" tabindex="0">
-                    </div>
-                    <input type="range" id="slDot" min="1" max="10" value="3"
-                           aria-label="Halftone dot size slider" tabindex="0">
-                </div>
-                <div class="control-group ctrl-hidden" id="thresholdControls" aria-hidden="true">
-                    <div class="control-header">
-                        <label for="slThresh">Threshold Level</label>
-                        <input type="number" id="valThresh" value="128" aria-label="Threshold level value" tabindex="0">
-                    </div>
-                    <input type="range" id="slThresh" min="1" max="255" value="128"
-                           aria-label="Threshold level slider" tabindex="0">
-                </div>
-                <div class="control-group">
-                    <label class="check-label">
-                        <input type="checkbox" id="chkInvert" tabindex="0">
-                        Invert Image (Negative)
-                    </label>
-                </div>
-            </div>
-        </div>
-
-        <!-- LASER SPOT SIMULATION -->
-        <div class="section collapsed" data-type="laser">
-            <div class="section-title" role="button" aria-expanded="false" tabindex="0">
-                <span class="section-title-inner">
-                    <span class="section-dot" aria-hidden="true"></span>Laser Spot Simulation
-                </span>
-                <span class="chev" aria-hidden="true">&#x25BC;</span>
-            </div>
-            <div class="section-body">
-                <div class="control-group">
-                    <label class="check-label">
-                        <input type="checkbox" id="chkSimulate" tabindex="0">
-                        Enable Burn Simulation
-                        <span class="sim-preview-label">preview only &mdash; export is always clean</span>
-                    </label>
-                </div>
-                <div class="control-group">
-                    <div class="control-header">
-                        <label for="slSpot">Laser Spot Size (mm)</label>
-                        <input type="number" id="valSpot" value="0.08" step="0.01"
-                               aria-label="Laser spot size value" tabindex="0">
-                    </div>
-                    <input type="range" id="slSpot" min="0.02" max="0.2" step="0.01" value="0.08"
-                           aria-label="Laser spot size slider" tabindex="0">
-                </div>
-                <div class="estimation" id="timeEst" role="status" aria-live="polite">
-                    Est. Time: &mdash; (load an image first)
-                </div>
-            </div>
-        </div>
-
-        <!-- EXTENDED TOOLS -->
-        <div class="section collapsed" data-type="tools">
-            <div class="section-title" role="button" aria-expanded="false" tabindex="0">
-                <span class="section-title-inner">
-                    <span class="section-dot" aria-hidden="true"></span>Extended Tools
-                </span>
-                <span class="chev" aria-hidden="true">&#x25BC;</span>
+                <span class="chev">▼</span>
             </div>
             <div class="section-body">
                 <div class="grid-2">
-                    <button id="btnSaveSet" class="btn-save-config" tabindex="0">Save Config</button>
-                    <button id="btnLoadSet" class="btn-load-config" tabindex="0">Load Config</button>
-                    <button id="btnEstTime" class="btn-est-time"   tabindex="0">Est. Engrave Time</button>
-                    <button id="btnEdgeMode" class="btn-edge-mode" tabindex="0">Edge Engrave</button>
-                    <button id="btnVectorExp" class="btn-vector-exp" tabindex="0">Vector Export</button>
-                    <button id="btnVectorTrace" class="btn-vector-trace" tabindex="0">🔷 Vector Trace</button>
-                    <button id="btnBgRemove" class="btn-bg-remove" tabindex="0">🪄 Remove BG (AI)</button>
-                    <button id="btnGcodeExport" class="btn-gcode-export" tabindex="0">&#x2699; G-Code Export</button>
+                    <button id="btnUndo" tabindex="0" disabled aria-label="Undo" title="Undo (Ctrl+Z)">↩ Undo</button>
+                    <button id="btnRedo" tabindex="0" disabled aria-label="Redo" title="Redo (Ctrl+Y)">↪ Redo</button>
+                    <button id="btnCalibGrid" tabindex="0">Calib Grid</button>
+                    <button id="btnReset" tabindex="0">↺ Reset</button>
+                    <label class="btn btn-blue" tabindex="0" role="button"
+                           aria-label="Batch process multiple images" title="Batch process multiple images" style="grid-column:span 2;">
+                        ⊞ Batch Process
+                        <input type="file" id="batchFileInput" accept="image/png,image/jpeg,image/webp"
+                               multiple aria-label="Select images for batch processing">
+                    </label>
                 </div>
             </div>
         </div>
 
-    </div><!-- /controls -->
-</main><!-- /workspace -->
+    </div>
+</div>
 
-<!-- =========================================== SIMPLE MODE MODAL ===== -->
+<!-- ── ADJUST DRAWER ──────────────────────────────────────────────── -->
+<div class="drawer" id="drawerAdjust" role="region" aria-label="Adjustments">
+    <div class="drawer-handle" id="handleAdjust"></div>
+    <div class="drawer-header">
+        <span class="drawer-title blue">🎚 Adjustments</span>
+        <button class="drawer-close" id="closeAdjust" aria-label="Close">✕</button>
+    </div>
+    <!-- Sub-tabs: Tonal | Resize | Detail -->
+    <div class="drawer-subtabs">
+        <button class="drawer-subtab active" data-subtab="tonal">Tonal</button>
+        <button class="drawer-subtab" data-subtab="resize">Resize</button>
+        <button class="drawer-subtab" data-subtab="detail">Detail</button>
+    </div>
+    <div class="drawer-body">
+
+        <!-- TONAL sub-panel -->
+        <div class="sub-panel active" id="subtab-tonal">
+            <div class="control-group">
+                <div class="control-header">
+                    <label for="slBright">Brightness</label>
+                    <input type="number" id="valBright" value="0" aria-label="Brightness value" tabindex="0">
+                </div>
+                <input type="range" id="slBright" min="-100" max="100" value="0" aria-label="Brightness slider" tabindex="0">
+            </div>
+            <div class="control-group">
+                <div class="control-header">
+                    <label for="slCont">Contrast</label>
+                    <input type="number" id="valCont" value="0" aria-label="Contrast value" tabindex="0">
+                </div>
+                <input type="range" id="slCont" min="-100" max="100" value="0" aria-label="Contrast slider" tabindex="0">
+            </div>
+            <div class="control-group">
+                <div class="control-header">
+                    <label for="slGamma">Gamma</label>
+                    <input type="number" id="valGamma" value="1" step="0.1" aria-label="Gamma value" tabindex="0">
+                </div>
+                <input type="range" id="slGamma" min="0.1" max="3" step="0.1" value="1" aria-label="Gamma slider" tabindex="0">
+            </div>
+            <div class="control-group">
+                <div class="control-header">
+                    <label for="slBlack">Black Point</label>
+                    <input type="number" id="valBlack" value="0" aria-label="Black point value" tabindex="0">
+                </div>
+                <input type="range" id="slBlack" min="0" max="100" value="0" aria-label="Black point slider" tabindex="0">
+            </div>
+            <div class="control-group">
+                <div class="control-header">
+                    <label for="slWhite">White Point</label>
+                    <input type="number" id="valWhite" value="255" aria-label="White point value" tabindex="0">
+                </div>
+                <input type="range" id="slWhite" min="150" max="255" value="255" aria-label="White point slider" tabindex="0">
+            </div>
+            <div class="control-group">
+                <label class="check-label">
+                    <input type="checkbox" id="chkProtectHigh" tabindex="0">
+                    Protect Highlights
+                </label>
+                <label class="check-label">
+                    <input type="checkbox" id="chkHistEq" tabindex="0">
+                    Histogram Equalization
+                </label>
+                <label class="check-label">
+                    <input type="checkbox" id="chkInvert" tabindex="0">
+                    Invert Image (Negative)
+                </label>
+            </div>
+        </div>
+
+        <!-- RESIZE sub-panel -->
+        <div class="sub-panel" id="subtab-resize">
+            <div class="control-group">
+                <label class="check-label">
+                    <input type="checkbox" id="chkLanczos" checked tabindex="0">
+                    Mitchell-Netravali Resizing
+                </label>
+                <label class="check-label">
+                    <input type="checkbox" id="chkCatmullRom" tabindex="0">
+                    Catmull-Rom mode (sharper — text &amp; line art)
+                </label>
+            </div>
+        </div>
+
+        <!-- DETAIL sub-panel -->
+        <div class="sub-panel" id="subtab-detail">
+            <div class="control-group">
+                <div class="control-header">
+                    <label for="slSharp">Sharpen (USM)</label>
+                    <input type="number" id="valSharp" value="0" aria-label="Sharpen value" tabindex="0">
+                </div>
+                <input type="range" id="slSharp" min="0" max="100" value="0" aria-label="Sharpen slider" tabindex="0">
+            </div>
+            <div class="usm-detail-controls control-group">
+                <div class="control-header">
+                    <label for="selUsmRadius">USM Radius</label>
+                    <select id="selUsmRadius" aria-label="Unsharp mask blur radius" tabindex="0">
+                        <option value="1">1px (fine)</option>
+                        <option value="2" selected>2px (balanced)</option>
+                        <option value="3">3px (broad)</option>
+                    </select>
+                </div>
+                <div class="control-header" style="margin-top:4px;">
+                    <label for="valUsmThresh">USM Threshold</label>
+                    <input type="number" id="valUsmThresh" value="0" min="0" max="255"
+                           aria-label="Unsharp mask threshold" tabindex="0">
+                </div>
+            </div>
+            <div class="control-group">
+                <div class="control-header">
+                    <label for="slLocalContrast">Local Contrast</label>
+                    <input type="number" id="valLocalContrast" value="0" aria-label="Local contrast value" tabindex="0">
+                </div>
+                <input type="range" id="slLocalContrast" min="0" max="100" value="0" aria-label="Local contrast slider" tabindex="0">
+            </div>
+            <div class="control-group">
+                <div class="control-header">
+                    <label for="slNoise">Noise Redux (Gaussian)</label>
+                    <input type="number" id="valNoise" value="0" aria-label="Noise reduction value" tabindex="0">
+                </div>
+                <input type="range" id="slNoise" min="0" max="50" value="0" aria-label="Noise reduction slider" tabindex="0">
+            </div>
+            <div class="control-group">
+                <div class="control-header">
+                    <label for="slDenoise">Median Denoise</label>
+                    <input type="number" id="valDenoise" value="0" aria-label="Median denoise value" tabindex="0">
+                </div>
+                <input type="range" id="slDenoise" min="0" max="5" value="0" aria-label="Median denoise slider" tabindex="0">
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ── DITHER DRAWER ──────────────────────────────────────────────── -->
+<div class="drawer" id="drawerDither" role="region" aria-label="Dithering">
+    <div class="drawer-handle" id="handleDither"></div>
+    <div class="drawer-header">
+        <span class="drawer-title purple">◈ Dithering</span>
+        <button class="drawer-close" id="closeDither" aria-label="Close">✕</button>
+    </div>
+    <div class="drawer-body">
+
+        <div class="control-group">
+            <select id="ditherSelect" tabindex="0">
+                <option value="none">None (Grayscale)</option>
+                <option value="adaptive">Adaptive Error Diffusion</option>
+                <optgroup label="Error Diffusion">
+                    <option value="floyd" selected>Floyd-Steinberg</option>
+                    <option value="jarvis">Jarvis-Judice-Ninke</option>
+                    <option value="stucki">Stucki</option>
+                    <option value="atkinson">Atkinson</option>
+                    <option value="riemersma">Riemersma (Worm-Free ✓)</option>
+                </optgroup>
+                <optgroup label="Ordered">
+                    <option value="bayer2">Bayer 2×2</option>
+                    <option value="bayer4">Bayer 4×4</option>
+                    <option value="bayer8">Bayer 8×8</option>
+                </optgroup>
+                <optgroup label="Halftone &amp; Threshold">
+                    <option value="halftone">True Halftone</option>
+                    <option value="halftone_lines">Halftone Lines</option>
+                    <option value="halftone_crosshatch">Halftone Crosshatch</option>
+                    <option value="threshold">Pure 1-bit Threshold</option>
+                </optgroup>
+            </select>
+        </div>
+
+        <div class="control-group ctrl-hidden" id="halftoneControls" aria-hidden="true">
+            <div class="control-header">
+                <label for="slDot">Halftone Dot Size</label>
+                <input type="number" id="valDot" value="3" aria-label="Halftone dot size value" tabindex="0">
+            </div>
+            <input type="range" id="slDot" min="1" max="10" value="3" aria-label="Halftone dot size slider" tabindex="0">
+        </div>
+
+        <div class="control-group ctrl-hidden" id="thresholdControls" aria-hidden="true">
+            <div class="control-header">
+                <label for="slThresh">Threshold Level</label>
+                <input type="number" id="valThresh" value="128" aria-label="Threshold level value" tabindex="0">
+            </div>
+            <input type="range" id="slThresh" min="1" max="255" value="128" aria-label="Threshold level slider" tabindex="0">
+        </div>
+
+        <!-- Laser Spot Simulation -->
+        <div class="section" style="margin-top:4px;">
+            <div class="section-title" role="button" aria-expanded="true" tabindex="0">
+                <span class="section-title-inner">
+                    <span class="section-dot" aria-hidden="true"></span>Laser Spot Simulation
+                </span>
+                <span class="chev">▼</span>
+            </div>
+            <div class="section-body">
+                <label class="check-label">
+                    <input type="checkbox" id="chkSimulate" tabindex="0">
+                    Enable Burn Simulation
+                    <span class="sim-preview-label">preview only</span>
+                </label>
+                <div class="control-group">
+                    <div class="control-header">
+                        <label for="slSpot">Laser Spot (mm)</label>
+                        <input type="number" id="valSpot" value="0.08" step="0.01" aria-label="Laser spot size value" tabindex="0">
+                    </div>
+                    <input type="range" id="slSpot" min="0.02" max="0.2" step="0.01" value="0.08" aria-label="Laser spot size slider" tabindex="0">
+                </div>
+                <div class="estimation" id="timeEst" role="status" aria-live="polite">
+                    Est. Time: — (load an image first)
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ── TOOLS DRAWER ───────────────────────────────────────────────── -->
+<div class="drawer" id="drawerTools" role="region" aria-label="Extended tools">
+    <div class="drawer-handle" id="handleTools"></div>
+    <div class="drawer-header">
+        <span class="drawer-title amber">🔧 Extended Tools</span>
+        <button class="drawer-close" id="closeTools" aria-label="Close">✕</button>
+    </div>
+    <div class="drawer-body">
+        <div class="grid-2">
+            <button id="btnSaveSet" class="btn-save-config" tabindex="0">💾 Save Config</button>
+            <button id="btnLoadSet" class="btn-load-config" tabindex="0">📂 Load Config</button>
+            <button id="btnEstTime" class="btn-est-time" tabindex="0">⏱ Est. Time</button>
+            <button id="btnEdgeMode" class="btn-edge-mode" tabindex="0">Edge Engrave</button>
+            <button id="btnVectorExp" class="btn-vector-exp" tabindex="0">SVG Export</button>
+            <button id="btnVectorTrace" class="btn-vector-trace" tabindex="0">🔷 Vector Trace</button>
+            <button id="btnBgRemove" class="btn-bg-remove" tabindex="0">🪄 Remove BG</button>
+            <button id="btnGcodeExport" class="btn-gcode-export" tabindex="0">⚙ G-Code</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════ TAB BAR ════════════ -->
+<nav class="tab-bar" role="tablist" aria-label="Navigation">
+    <button class="tab-btn" data-tab="presets" role="tab" aria-selected="false" tabindex="0">
+        <span class="tab-icon">⚡</span>
+        <span class="tab-label">Presets</span>
+    </button>
+    <button class="tab-btn" data-tab="adjust" role="tab" aria-selected="false" tabindex="0">
+        <span class="tab-icon">🎚</span>
+        <span class="tab-label">Adjust</span>
+    </button>
+    <button class="tab-btn" data-tab="export" id="btnExport" role="button" tabindex="0" aria-label="Export PNG">
+        <span class="tab-icon">⬇</span>
+        <span class="tab-label">Export</span>
+    </button>
+    <button class="tab-btn" data-tab="dither" role="tab" aria-selected="false" tabindex="0">
+        <span class="tab-icon">◈</span>
+        <span class="tab-label">Dither</span>
+    </button>
+    <button class="tab-btn" data-tab="tools" role="tab" aria-selected="false" tabindex="0">
+        <span class="tab-icon">🔧</span>
+        <span class="tab-label">Tools</span>
+    </button>
+</nav>
+
+
+<!-- ═══════════════════════════════════════════ MODALS ════════════ -->
+
+<!-- SIMPLE MODE MODAL -->
 <div id="simpleModeModal" class="modal-overlay" role="dialog" aria-modal="true"
      aria-label="Simple Mode" aria-hidden="true">
     <div class="modal-content">
@@ -478,13 +536,12 @@
         </div>
         <div class="modal-body">
             <div class="simple-steps-hint" aria-hidden="true">
-                <div class="step-dot" data-n="1">Set Size</div>
+                <div class="step-dot" data-n="1">Size</div>
                 <div class="step-dot" data-n="2">Material</div>
                 <div class="step-dot" data-n="3">Go!</div>
             </div>
-
             <div class="simple-step">
-                <label for="simpleWidth">Step 1 &mdash; Engrave size</label>
+                <label for="simpleWidth">Step 1 — Engrave size</label>
                 <div class="simple-size-row">
                     <div>
                         <div class="simple-dim-label">Width (mm)</div>
@@ -498,11 +555,10 @@
                                aria-label="Simple mode height in millimetres" tabindex="0">
                     </div>
                 </div>
-                <div class="simple-tip">💡 Tip: leave at 100&times;100mm if unsure</div>
+                <div class="simple-tip">💡 Leave at 100×100mm if unsure</div>
             </div>
-
             <div class="simple-step">
-                <label for="simpleMaterial">Step 2 &mdash; Select material</label>
+                <label for="simpleMaterial">Step 2 — Select material</label>
                 <select id="simpleMaterial" tabindex="0" aria-label="Material selection for Simple Mode">
                     <optgroup label="Wood">
                         <option value="basswood">Basswood ply</option>
@@ -518,24 +574,21 @@
                         <option value="acrylic">Acrylic</option>
                         <option value="glass">Glass</option>
                         <option value="anodised">Anodised aluminium</option>
-                        <option value="black_tile">Black painted ceramic tile</option>
-                        <option value="white_tile">White painted ceramic tile</option>
+                        <option value="black_tile">Black painted tile</option>
+                        <option value="white_tile">White painted tile</option>
                         <option value="canvas">Canvas</option>
                         <option value="scratch">Rainbow scratch paper</option>
                     </optgroup>
                 </select>
             </div>
-
             <div class="simple-step">
-                <label>Step 3 &mdash; Process &amp; download</label>
+                <label>Step 3 — Process &amp; download</label>
                 <button id="btnSimpleGo" class="primary" tabindex="0"
                         aria-label="Process and download PNG">⚡ Process &amp; Download PNG</button>
                 <div class="simple-status" id="simpleStatus" role="status" aria-live="polite"></div>
             </div>
-
             <p class="simple-footer-note">
-                Simple Mode automatically applies the best settings for your chosen material,
-                processes your image, and downloads the result &mdash; no tweaking needed.
+                Simple Mode applies the best settings for your material and exports automatically.
                 Import an image first, then press Go!
             </p>
         </div>
@@ -558,7 +611,7 @@
 <!-- TOAST -->
 <div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
-<!-- ======================================= VECTOR TRACE MODAL ==== -->
+<!-- VECTOR TRACE MODAL -->
 <div id="vectorTraceModal" class="modal-overlay" role="dialog" aria-modal="true"
      aria-label="Vector Trace" aria-hidden="true">
     <div class="modal-content modal-wide">
@@ -591,7 +644,7 @@
             <div class="control-group">
                 <label class="check-label">
                     <input type="checkbox" id="vtOptimise" checked tabindex="0">
-                    Optimise paths (merge endpoints, remove collinear points)
+                    Optimise paths
                 </label>
                 <label class="check-label">
                     <input type="checkbox" id="vtInvert" tabindex="0">
@@ -599,19 +652,16 @@
                 </label>
             </div>
             <div class="grid-2" style="margin-top:12px;">
-                <button id="btnVtPreview" class="btn-blue" tabindex="0">👁 Preview Trace</button>
-                <button id="btnVtExportSvg" class="primary" tabindex="0">&#x2B07; Export SVG</button>
+                <button id="btnVtPreview" class="btn-blue" tabindex="0">👁 Preview</button>
+                <button id="btnVtExportSvg" class="primary" tabindex="0">⬇ Export SVG</button>
             </div>
-            <div id="vtStatus" style="margin-top:10px;font-size:0.8rem;color:var(--amber);"></div>
-            <canvas id="vtPreviewCanvas" style="margin-top:12px;max-width:100%;border:1px solid var(--border);display:none;"></canvas>
+            <div id="vtStatus"></div>
+            <canvas id="vtPreviewCanvas"></canvas>
         </div>
     </div>
 </div>
 
-
-
-
-<!-- ============================================= HELP MODAL ========= -->
+<!-- HELP MODAL -->
 <div id="helpModal" class="modal-overlay" role="dialog" aria-modal="true"
      aria-label="Help and Guide" aria-hidden="true">
     <div class="modal-content modal-wide">
@@ -620,125 +670,71 @@
             <button id="btnCloseHelp" aria-label="Close Help" tabindex="0">&times;</button>
         </div>
         <div class="modal-body">
-
-            <!-- QUICK START -->
             <div class="help-section">
-                <div class="help-section-title">&#x26A1; Quick Start &mdash; 4 steps</div>
+                <div class="help-section-title">⚡ Quick Start — 4 steps</div>
                 <div class="help-steps">
                     <div class="help-step">
                         <div class="help-step-num">1</div>
-                        <div><strong>Import</strong> &mdash; tap + Import or the camera button to load your image</div>
+                        <div><strong>Import</strong> — tap + Import or the camera button to load your image</div>
                     </div>
                     <div class="help-step">
                         <div class="help-step-num">2</div>
-                        <div><strong>Size</strong> &mdash; set your engraving width and height in mm to match your material</div>
+                        <div><strong>Size</strong> — set your engraving width and height in mm in the Presets tab</div>
                     </div>
                     <div class="help-step">
                         <div class="help-step-num">3</div>
-                        <div><strong>Material</strong> &mdash; pick your material from the dropdown. The app sets everything else automatically</div>
+                        <div><strong>Material</strong> — pick your material. The app sets everything else automatically</div>
                     </div>
                     <div class="help-step">
                         <div class="help-step-num">4</div>
-                        <div><strong>Export PNG</strong> &mdash; tap the red button at the bottom. Done</div>
+                        <div><strong>Export</strong> — tap the red Export button at the bottom. Done</div>
                     </div>
                 </div>
-                <p class="help-note">That is all you need. The sliders and advanced settings are optional fine-tuning &mdash; you do not need to touch them for great results.</p>
+                <p class="help-note">That is all you need. The Adjust and Dither tabs are optional fine-tuning.</p>
             </div>
-
-            <!-- PRESET BUTTONS -->
             <div class="help-section">
-                <div class="help-section-title">&#x1F4CB; What the preset buttons do</div>
-                <div class="help-item">
-                    <span class="help-badge green">&#x26A1; Simple</span>
-                    <span>Guided step-by-step mode for beginners. Walks you through size, material and export in a clean popup.</span>
-                </div>
-                <div class="help-item">
-                    <span class="help-badge blue">Auto Prep</span>
-                    <span>Applies a balanced general-purpose preset. Good starting point for most images on most materials.</span>
-                </div>
-                <div class="help-item">
-                    <span class="help-badge orange">Smart MDF</span>
-                    <span>Analyses your image scientifically and applies optimised settings specifically for MDF. Uses histogram analysis to pick the best dithering pattern automatically.</span>
-                </div>
-                <div class="help-item">
-                    <span class="help-badge amber">&#x1F6A7; Basswood</span>
-                    <span>Preset tuned for pale basswood ply. Lifts shadows and boosts local contrast to compensate for basswood&apos;s low burn contrast.</span>
-                </div>
-                <div class="help-item">
-                    <span class="help-badge purple">Perfect Engrave</span>
-                    <span>Reads the processed image, analyses its tonal range and contrast, then automatically picks the best dithering algorithm for that specific image.</span>
-                </div>
-                <div class="help-item">
-                    <span class="help-badge cyan">HQ Mode</span>
-                    <span>Doubles the DPI for finer detail. Slower to process and produces a larger file. Best for small detailed engravings.</span>
-                </div>
+                <div class="help-section-title">📋 What the preset buttons do</div>
+                <div class="help-item"><span class="help-badge green">⚡ Simple</span><span>Step-by-step guided wizard for beginners.</span></div>
+                <div class="help-item"><span class="help-badge blue">Auto Prep</span><span>Balanced general-purpose preset. Good for most images.</span></div>
+                <div class="help-item"><span class="help-badge orange">Smart MDF</span><span>Analyses your image scientifically for MDF.</span></div>
+                <div class="help-item"><span class="help-badge amber">🪵 Basswood</span><span>Tuned for pale basswood ply.</span></div>
+                <div class="help-item"><span class="help-badge purple">Perfect Engrave</span><span>Auto-picks the best dithering algorithm for your image.</span></div>
+                <div class="help-item"><span class="help-badge cyan">HQ Mode</span><span>Doubles DPI for finer detail. Slower to process.</span></div>
             </div>
-
-            <!-- HOW IT WORKS -->
             <div class="help-section">
-                <div class="help-section-title">&#x2699; How the processing works</div>
-                <p class="help-para">Every image goes through a scientifically correct pipeline:</p>
-                <div class="help-item">
-                    <span class="help-badge-plain">Resize</span>
-                    <span>Mitchell-Netravali bicubic resampling &mdash; the same algorithm used by professional print software. Preserves fine detail when scaling down.</span>
-                </div>
-                <div class="help-item">
-                    <span class="help-badge-plain">Greyscale</span>
-                    <span>Rec.709 luminance formula (the broadcast TV standard) &mdash; weights red, green and blue correctly for human perception rather than averaging them equally.</span>
-                </div>
-                <div class="help-item">
-                    <span class="help-badge-plain">Tonal</span>
-                    <span>Contrast, brightness, gamma and black/white point are applied in the correct scientific order to preserve detail across the full tonal range.</span>
-                </div>
-                <div class="help-item">
-                    <span class="help-badge-plain">Dithering</span>
-                    <span>Converts greyscale to pure black and white using error-diffusion or ordered patterns. This is what makes gradients look smooth when engraved. The material preset picks the right algorithm automatically.</span>
-                </div>
-                <div class="help-item">
-                    <span class="help-badge-plain">DPI</span>
-                    <span>The exported PNG has DPI metadata embedded so your laser controller knows the exact physical size without you needing to enter it manually.</span>
-                </div>
+                <div class="help-section-title">⚙ How the processing works</div>
+                <div class="help-item"><span class="help-badge-plain">Resize</span><span>Mitchell-Netravali bicubic resampling — same as professional print software.</span></div>
+                <div class="help-item"><span class="help-badge-plain">Greyscale</span><span>Rec.709 luminance (broadcast TV standard) — weights colours correctly for human perception.</span></div>
+                <div class="help-item"><span class="help-badge-plain">Tonal</span><span>Contrast, brightness, gamma applied in the correct scientific order.</span></div>
+                <div class="help-item"><span class="help-badge-plain">Dithering</span><span>Converts greyscale to pure black &amp; white using error-diffusion or ordered patterns.</span></div>
+                <div class="help-item"><span class="help-badge-plain">DPI</span><span>Exported PNG has DPI metadata embedded so your laser software knows the exact physical size.</span></div>
             </div>
-
-            <!-- PROCESSING TIME -->
             <div class="help-section">
-                <div class="help-section-title">&#x23F1; Processing time</div>
-                <p class="help-para">Most images process in 5&ndash;15 seconds. Large images at high DPI or with error-diffusion dithering (Floyd-Steinberg, Jarvis, Stucki) can take up to 3 minutes on mobile. The progress bar confirms the app is working &mdash; do not close it while processing.</p>
+                <div class="help-section-title">⏱ Processing time</div>
+                <p class="help-para">Most images process in 5–15 seconds. Large images at high DPI or with Floyd-Steinberg/Jarvis/Stucki dithering can take up to 3 minutes on mobile.</p>
             </div>
-
-            <!-- TIPS -->
             <div class="help-section">
-                <div class="help-section-title">&#x1F4A1; Tips</div>
-                <p class="help-para">Change one thing at a time. The image re-processes every time you adjust a slider &mdash; if you move several at once you will not know which one made the difference.</p>
-                <p class="help-para">The A/B button in the preview lets you compare the original and processed versions side by side by dragging the divider.</p>
-                <p class="help-para">Double-tap any slider to reset it to its default value.</p>
+                <div class="help-section-title">💡 Tips</div>
                 <p class="help-para">Your settings are automatically saved and restored next time you open the app.</p>
+                <p class="help-para">The A/B button in the preview lets you compare original vs processed by dragging the divider.</p>
             </div>
-
-            <!-- SUPPORT -->
             <div class="help-section">
-                <div class="help-section-title">&#x2615; Support the build</div>
+                <div class="help-section-title">☕ Support the build</div>
                 <p class="help-para">Built by one person with no budget. If this saves you time, any support is genuinely appreciated.</p>
                 <a href="https://paypal.me/stephndave" target="_blank" rel="noopener"
-                   style="display:inline-block;margin-top:6px;padding:10px 18px;
-                          background:#ff4444;color:#fff;border-radius:6px;
-                          text-decoration:none;font-weight:700;font-size:0.85rem;
-                          letter-spacing:0.03em;">&#x2615; Buy me a brew</a>
+                   style="display:inline-block;margin-top:6px;padding:10px 18px;background:#ff4444;color:#fff;border-radius:6px;text-decoration:none;font-weight:700;font-size:0.85rem;">☕ Buy me a brew</a>
             </div>
-
-            <div class="help-footer">
-                Grain &amp; Glow Studio v7 &mdash; created by Stephanie Adams, Stoke-on-Trent &mdash; &copy; 2026
-            </div>
+            <div class="help-footer">Grain &amp; Glow Studio v7 — Stephanie Adams, Stoke-on-Trent — © 2026</div>
         </div>
     </div>
 </div>
 
-<!-- ======================================= G-CODE EXPORT MODAL ==== -->
+<!-- G-CODE MODAL -->
 <div id="gcodeModal" class="modal-overlay" role="dialog" aria-modal="true"
      aria-label="G-Code Export" aria-hidden="true">
     <div class="modal-content modal-wide">
         <div class="modal-header">
-            <h2>&#x2699; G-CODE EXPORT</h2>
+            <h2>⚙ G-CODE EXPORT</h2>
             <button id="btnCloseGcode" aria-label="Close G-Code Export" tabindex="0">&times;</button>
         </div>
         <div class="modal-body">
@@ -754,24 +750,20 @@
                 <div class="control-group">
                     <label for="gcMode">Engrave Mode</label>
                     <select id="gcMode" tabindex="0">
-                        <option value="raster">Raster scan (line-by-line)</option>
-                        <option value="vector">Vector outlines only</option>
+                        <option value="raster">Raster scan</option>
+                        <option value="vector">Vector outlines</option>
                     </select>
                 </div>
-            </div>
-            <div class="grid-2">
                 <div class="control-group">
-                    <label for="gcPower">Laser Power (S max)</label>
+                    <label for="gcPower">Power (S max)</label>
                     <input type="number" id="gcPower" value="1000" min="1" max="65535" tabindex="0">
                 </div>
                 <div class="control-group">
-                    <label for="gcSpeed">Feed Rate (mm/min)</label>
+                    <label for="gcSpeed">Feed (mm/min)</label>
                     <input type="number" id="gcSpeed" value="3000" min="100" max="30000" tabindex="0">
                 </div>
-            </div>
-            <div class="grid-2">
                 <div class="control-group">
-                    <label for="gcPassDepth">Pass Depth (mm) <small style="color:var(--text-dim)">(0=disable Z)</small></label>
+                    <label for="gcPassDepth">Pass Depth (mm)</label>
                     <input type="number" id="gcPassDepth" value="0" min="0" max="20" step="0.1" tabindex="0">
                 </div>
                 <div class="control-group">
@@ -782,171 +774,192 @@
             <div class="control-group">
                 <label class="check-label">
                     <input type="checkbox" id="gcLaserMode" checked tabindex="0">
-                    Enable laser mode ($32=1 / M3 S dynamic)
+                    Enable laser mode ($32=1)
                 </label>
                 <label class="check-label">
                     <input type="checkbox" id="gcHome" checked tabindex="0">
-                    Return to origin after job (G28 / G0 X0 Y0)
+                    Return to origin after job
                 </label>
             </div>
             <div id="gcStatus" style="margin-top:8px;font-size:0.8rem;color:var(--amber);"></div>
             <div class="grid-2" style="margin-top:12px;">
                 <button id="btnGcPreview" class="btn-blue" tabindex="0">👁 Preview</button>
-                <button id="btnGcDownload" class="primary" tabindex="0">&#x2B07; Download .nc</button>
+                <button id="btnGcDownload" class="primary" tabindex="0">⬇ Download .nc</button>
             </div>
             <textarea id="gcPreviewText" readonly tabindex="0"
-                style="display:none;margin-top:12px;width:100%;height:200px;font-family:monospace;
-                       font-size:0.72rem;background:var(--bg-input);color:var(--text);
-                       border:1px solid var(--border);padding:8px;resize:vertical;box-sizing:border-box;"></textarea>
+                style="display:none;margin-top:12px;width:100%;height:180px;font-family:monospace;
+                       font-size:0.72rem;background:var(--bg-input);color:var(--text-main);
+                       border:1px solid var(--border);padding:8px;resize:vertical;box-sizing:border-box;border-radius:4px;"></textarea>
         </div>
     </div>
 </div>
 
-<!-- =================================================== SCRIPTS ======== -->
+<!-- ═══════════════════════════════════════════ SCRIPTS ════════════ -->
 <script src="laserprep.js"></script>
 <script>
-    // ─── Grain & Glow Studio (c) 2026 Stephanie Adams ──────────────────────────
-    // Licence splash  -  built in JS and injected only when needed.
-    // Nothing sits in the DOM unless it's actively being shown.
-    // ──────────────────────────────────────────────────────────────────────────
+/* ── Tab bar & drawer controller ─────────────────────────────────── */
+(function() {
+    const drawers = {
+        presets: document.getElementById('drawerPresets'),
+        adjust:  document.getElementById('drawerAdjust'),
+        dither:  document.getElementById('drawerDither'),
+        tools:   document.getElementById('drawerTools')
+    };
+    const tabBtns = document.querySelectorAll('.tab-btn[data-tab]');
+    let activeTab = null;
 
-    (function() {
-        const KEY  = 'gg_laserprep_licence_v1';
-        const HOST = 'laserprep.pages.dev'; // authorised domains
-        const HOST2 = 'github.io'; // GitHub Pages
-
-        // ── helpers ──────────────────────────────────────────────────────────
-        function accepted() {
-            try { return localStorage.getItem(KEY) === '1'; } catch(e) { return false; }
-        }
-
-        function accept() {
-            try { localStorage.setItem(KEY, '1'); } catch(e) {}
-            // Remove modal overlay
-            const el = document.getElementById('_ggSplash');
-            if (el) el.remove();
-            // Inject permanent footer credit
-            injectFooter();
-        }
-
-        function injectFooter() {
-            if (document.getElementById('_ggFooter')) return;
-            const f = document.createElement('div');
-            f.id = '_ggFooter';
-            f.setAttribute('aria-hidden','true');
-            f.style.cssText = [
-                'position:fixed','bottom:calc(60px + env(safe-area-inset-bottom))','left:0','right:0','z-index:9000',
-                'background:#0d0d0d','border-top:1px solid #1e1e1e',
-                'font-family:Space Mono,monospace','font-size:0.62rem',
-                'color:#444','text-align:center','padding:4px 10px',
-                'letter-spacing:0.05em','pointer-events:none','user-select:none'
-            ].join(';');
-            f.textContent = '\u00a9 2026 Stephanie Adams \u00b7 Grain & Glow Studio \u00b7 All Rights Reserved';
-            document.body.appendChild(f);
-        }
-
-        function injectUnauthorisedBanner() {
-            if (document.getElementById('_ggBanner')) return;
-            const b = document.createElement('div');
-            b.id = '_ggBanner';
-            b.setAttribute('aria-hidden','true');
-            b.style.cssText = [
-                'position:fixed','bottom:0','left:0','right:0','z-index:9001',
-                'background:#cc0000','color:#fff',
-                'font-family:Space Mono,monospace','font-size:0.72rem','font-weight:bold',
-                'text-align:center','padding:6px 40px 6px 16px',
-                'pointer-events:auto','user-select:none','line-height:1.4'
-            ].join(';');
-            b.innerHTML = '\u26a0\ufe0f UNAUTHORISED COPY \u2014 Created by Stephanie Adams \u00a9 2026. Grain &amp; Glow Studio. Redistribution prohibited.' +
-                '<span onclick="this.parentNode.remove()" style="position:absolute;right:10px;top:50%;' +
-                'transform:translateY(-50%);cursor:pointer;font-size:1rem;opacity:0.8;padding:4px;">✕</span>';
-            document.body.appendChild(b);
-        }
-
-        function injectSplash() {
-            const overlay = document.createElement('div');
-            overlay.id = '_ggSplash';
-            overlay.style.cssText = [
-                'position:fixed','inset:0','z-index:99998',
-                'background:rgba(0,0,0,0.93)',
-                'display:flex','align-items:center','justify-content:center',
-                'font-family:Space Mono,monospace'
-            ].join(';');
-
-            overlay.innerHTML = [
-                '<div style="background:#111;border:1px solid #ff4444;border-radius:10px;',
-                'max-width:500px;width:90%;padding:28px 24px;color:#e0e0e0;',
-                'box-shadow:0 0 40px rgba(255,68,68,0.2);">',
-
-                '<div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;">',
-                '<svg viewBox="0 0 22 22" width="32" height="32" fill="none">',
-                '<rect x="1" y="1" width="20" height="20" rx="3" stroke="#ff4444" stroke-width="1.2" fill="none"/>',
-                '<circle cx="11" cy="11" r="2.5" fill="none" stroke="#ff4444" stroke-width="1.2"/>',
-                '<line x1="3" y1="11" x2="19" y2="11" stroke="#ff4444" stroke-width="0.8" opacity="0.4"/>',
-                '</svg>',
-                '<div>',
-                '<div style="color:#ff4444;font-size:0.95rem;font-weight:700;letter-spacing:0.07em;">Grain &amp; Glow Studio</div>',
-                '<div style="font-size:0.68rem;color:#666;margin-top:2px;">\u00a9 2026 Stephanie Adams \u2014 All Rights Reserved</div>',
-                '</div></div>',
-
-                '<div style="border-top:1px solid #222;padding-top:16px;margin-bottom:16px;">',
-                '<p style="font-size:0.75rem;line-height:1.6;color:#ccc;margin:0 0 10px;">',
-                'This tool was designed and built by <strong style="color:#ff4444;">Stephanie Adams</strong>, ',
-                'Stoke-on-Trent, UK. &mdash; <em>Grain &amp; Glow Studio</em></p>',
-                '<p style="font-size:0.75rem;line-height:1.6;color:#ccc;margin:0 0 8px;">By continuing you agree:</p>',
-                '<ul style="font-size:0.73rem;line-height:1.75;color:#aaa;margin:0 0 10px;padding-left:16px;">',
-                '<li>This software is the intellectual property of Stephanie Adams.</li>',
-                '<li>You may <strong style="color:#fff;">not</strong> copy, redistribute, or claim it as your own.</li>',
-                '<li>You may <strong style="color:#fff;">not</strong> share this app without permission from the author.</li>',
-                '</ul>',
-                '<p style="font-size:0.68rem;color:#555;margin:0;">Enquiries: Grain &amp; Glow Studio, Stoke-on-Trent.</p>',
-                '</div>',
-
-                '<div style="display:flex;gap:10px;justify-content:flex-end;">',
-                '<button id="_ggDecline" style="background:transparent;border:1px solid #444;color:#666;',
-                'border-radius:5px;padding:8px 16px;font-family:inherit;font-size:0.75rem;cursor:pointer;">',
-                '\u2715 Decline &amp; Leave</button>',
-                '<button id="_ggAccept" style="background:#ff4444;border:none;color:#fff;',
-                'border-radius:5px;padding:8px 20px;font-family:inherit;font-size:0.75rem;',
-                'font-weight:700;cursor:pointer;">\u2713 I Agree \u2014 Continue</button>',
-                '</div>',
-                '</div>'
-            ].join('');
-
-            document.body.appendChild(overlay);
-
-            document.getElementById('_ggAccept').addEventListener('click', accept);
-            document.getElementById('_ggDecline').addEventListener('click', function() {
-                overlay.remove();
-                window.history.back();
-            });
-        }
-
-        // ── run ──────────────────────────────────────────────────────────────
-        const host = (location.hostname || '').toLowerCase();
-        const isLocal = location.protocol === 'file:' || host === 'localhost' ||
-                        host === '127.0.0.1' || host.startsWith('192.168.');
-        const isAuth  = isLocal || host.includes(HOST) || host.includes(HOST2);
-
-        if (!isAuth) injectUnauthorisedBanner();
-
-        if (accepted()) {
-            // Returning visitor  -  just show the footer credit, nothing blocking
-            injectFooter();
-        } else {
-            // First visit  -  show licence splash
-            injectSplash();
-        }
-    })();
-
-    // Register the Service Worker
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('./sw.js')
-                .then((reg) => console.log('Service worker registered.', reg))
-                .catch((err) => console.log('Service worker registration failed:', err));
-        });
+    function closeAll() {
+        Object.values(drawers).forEach(d => d && d.classList.remove('open'));
+        tabBtns.forEach(b => b.classList.remove('active'));
+        activeTab = null;
     }
+
+    tabBtns.forEach(btn => {
+        const tab = btn.dataset.tab;
+        if (tab === 'export') return; // export handled by laserprep.js
+
+        btn.addEventListener('click', () => {
+            if (activeTab === tab) {
+                closeAll();
+            } else {
+                closeAll();
+                if (drawers[tab]) {
+                    drawers[tab].classList.add('open');
+                    btn.classList.add('active');
+                    activeTab = tab;
+                }
+            }
+        });
+    });
+
+    // Close buttons inside drawers
+    ['Presets','Adjust','Dither','Tools'].forEach(name => {
+        const btn = document.getElementById('close' + name);
+        if (btn) btn.addEventListener('click', closeAll);
+    });
+
+    // Drag handle touch-to-dismiss
+    Object.values(drawers).forEach(d => {
+        if (!d) return;
+        const handle = d.querySelector('.drawer-handle');
+        if (!handle) return;
+        let startY = 0;
+        handle.addEventListener('touchstart', e => { startY = e.touches[0].clientY; }, { passive: true });
+        handle.addEventListener('touchend', e => {
+            const dy = e.changedTouches[0].clientY - startY;
+            if (dy > 40) closeAll();
+        }, { passive: true });
+    });
+
+    // Sub-tabs inside Adjust drawer
+    const subtabBtns = document.querySelectorAll('.drawer-subtab');
+    subtabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const target = btn.dataset.subtab;
+            subtabBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.querySelectorAll('.sub-panel').forEach(p => p.classList.remove('active'));
+            const panel = document.getElementById('subtab-' + target);
+            if (panel) panel.classList.add('active');
+        });
+    });
+
+    // Section collapse toggles (inside drawers)
+    document.querySelectorAll('.section-title').forEach(title => {
+        title.addEventListener('click', () => {
+            const section = title.closest('.section');
+            if (section) section.classList.toggle('collapsed');
+        });
+    });
+
+})();
+</script>
+
+<script>
+/* ── Licence splash ───────────────────────────────────────────────── */
+(function() {
+    const KEY  = 'gg_laserprep_licence_v1';
+    const HOST = 'laserprep.pages.dev';
+    const HOST2 = 'github.io';
+
+    function accepted() {
+        try { return localStorage.getItem(KEY) === '1'; } catch(e) { return false; }
+    }
+    function accept() {
+        try { localStorage.setItem(KEY, '1'); } catch(e) {}
+        const el = document.getElementById('_ggSplash');
+        if (el) el.remove();
+        injectFooter();
+    }
+    function injectFooter() {
+        if (document.getElementById('_ggFooter')) return;
+        const f = document.createElement('div');
+        f.id = '_ggFooter';
+        f.setAttribute('aria-hidden','true');
+        f.style.cssText = [
+            'position:fixed','bottom:calc(62px + env(safe-area-inset-bottom))','left:0','right:0','z-index:9000',
+            'background:#0b0d12','border-top:1px solid #181e2c',
+            'font-family:Space Mono,monospace','font-size:0.58rem',
+            'color:#333','text-align:center','padding:3px 10px',
+            'letter-spacing:0.05em','pointer-events:none','user-select:none'
+        ].join(';');
+        f.textContent = '\u00a9 2026 Stephanie Adams \u00b7 Grain & Glow Studio \u00b7 All Rights Reserved';
+        document.body.appendChild(f);
+    }
+    function injectUnauthorisedBanner() {
+        if (document.getElementById('_ggBanner')) return;
+        const b = document.createElement('div');
+        b.id = '_ggBanner';
+        b.setAttribute('aria-hidden','true');
+        b.style.cssText = [
+            'position:fixed','bottom:0','left:0','right:0','z-index:9001',
+            'background:#cc0000','color:#fff',
+            'font-family:Space Mono,monospace','font-size:0.72rem','font-weight:bold',
+            'text-align:center','padding:6px 40px 6px 16px',
+            'pointer-events:auto','user-select:none','line-height:1.4'
+        ].join(';');
+        b.innerHTML = '\u26a0\ufe0f UNAUTHORISED COPY \u2014 Created by Stephanie Adams \u00a9 2026. Grain &amp; Glow Studio. Redistribution prohibited.' +
+            '<span onclick="this.parentNode.remove()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:1rem;opacity:0.8;padding:4px;">✕</span>';
+        document.body.appendChild(b);
+    }
+    function injectSplash() {
+        const overlay = document.createElement('div');
+        overlay.id = '_ggSplash';
+        overlay.style.cssText = ['position:fixed','inset:0','z-index:99998','background:rgba(0,0,0,0.94)','display:flex','align-items:flex-end','justify-content:center','font-family:Space Mono,monospace'].join(';');
+        overlay.innerHTML = [
+            '<div style="background:#0f1219;border:1px solid #ff4444;border-radius:20px 20px 0 0;',
+            'width:100%;max-width:520px;padding:24px 20px calc(20px + env(safe-area-inset-bottom));color:#e0e0e0;',
+            'box-shadow:0 -8px 40px rgba(255,68,68,0.15);">',
+            '<div style="width:36px;height:4px;background:#2a3040;border-radius:2px;margin:0 auto 16px;"></div>',
+            '<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">',
+            '<svg viewBox="0 0 22 22" width="28" height="28" fill="none"><rect x="1" y="1" width="20" height="20" rx="3" stroke="#ff4444" stroke-width="1.2" fill="none"/><circle cx="11" cy="11" r="2.5" fill="none" stroke="#ff4444" stroke-width="1.2"/><line x1="3" y1="11" x2="19" y2="11" stroke="#ff4444" stroke-width="0.8" opacity="0.4"/></svg>',
+            '<div><div style="color:#ff4444;font-size:0.9rem;font-weight:700;letter-spacing:0.07em;">Grain &amp; Glow Studio</div>',
+            '<div style="font-size:0.62rem;color:#555;margin-top:2px;">\u00a9 2026 Stephanie Adams</div></div></div>',
+            '<p style="font-size:0.75rem;line-height:1.6;color:#bbb;margin:0 0 12px;">Built by <strong style="color:#ff4444;">Stephanie Adams</strong>, Stoke-on-Trent. By continuing you agree not to copy, redistribute, or claim this tool as your own.</p>',
+            '<div style="display:flex;gap:10px;">',
+            '<button id="_ggDecline" style="flex:1;background:transparent;border:1px solid #2a3040;color:#555;border-radius:10px;padding:12px;font-family:inherit;font-size:0.75rem;cursor:pointer;">\u2715 Leave</button>',
+            '<button id="_ggAccept" style="flex:2;background:#ff4444;border:none;color:#fff;border-radius:10px;padding:12px;font-family:inherit;font-size:0.8rem;font-weight:700;cursor:pointer;">\u2713 I Agree \u2014 Continue</button>',
+            '</div></div>'
+        ].join('');
+        document.body.appendChild(overlay);
+        document.getElementById('_ggAccept').addEventListener('click', accept);
+        document.getElementById('_ggDecline').addEventListener('click', function() { overlay.remove(); window.history.back(); });
+    }
+
+    const host = (location.hostname || '').toLowerCase();
+    const isLocal = location.protocol === 'file:' || host === 'localhost' || host === '127.0.0.1' || host.startsWith('192.168.');
+    const isAuth  = isLocal || host.includes(HOST) || host.includes(HOST2);
+    if (!isAuth) injectUnauthorisedBanner();
+    if (accepted()) { injectFooter(); } else { injectSplash(); }
+})();
+
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+            .then(reg => console.log('SW registered', reg))
+            .catch(err => console.log('SW failed:', err));
+    });
+}
 </script>
 
 </body>
