@@ -586,8 +586,7 @@
             }
 
             /* Overlays drawn after putImageData  -  display only, never in exported PNG */
-            applyOverlays();
-            if (state.physicalSim) applyPhysicalTexture();
+            applyOverlays();   /* applyPhysicalTexture is called inside applyOverlays */
             endProcessing();
         } catch(err) {
             console.error('[Render error]', err);
@@ -735,6 +734,7 @@
             link.href = url;
             link.click();
             setTimeout(() => URL.revokeObjectURL(url), 5000);
+            toast('\u2713 PNG exported: ' + fname);
         }
     }
 
@@ -1019,16 +1019,32 @@
         reader.readAsArrayBuffer(file);
     }
     function handleBatchResult(result) {
-        if (!result) return;
-        state.batchResults.push({
-            name: (state.loadedFileName || 'image').replace(/\.[^.]+$/, '') + '_laser.png',
-            data: result,
-            w: state.processedImageW,
-            h: state.processedImageH
-        });
+        /* Worker2 (batch) delivers its result here. Mirror the primary path:
+           store into state.processedImageData so _batchOnComplete can read it,
+           then invoke the callback that processBatchNext registered. */
+        if (!result || !result.resultData) return;
+        state.processedImageData = new Uint8ClampedArray(result.resultData);
+        state.processedImageW    = state._pendingW || state.processedImageW;
+        state.processedImageH    = state._pendingH || state.processedImageH;
+        if (result.originalResized) {
+            state.originalResizedData = new Uint8ClampedArray(result.originalResized);
+            state.originalResizedW    = state.processedImageW;
+            state.originalResizedH    = state.processedImageH;
+        }
+        if (typeof state._batchOnComplete === 'function') {
+            const cb = state._batchOnComplete;
+            state._batchOnComplete = null;
+            cb();
+        } else {
+            setTimeout(processBatchNext, 80);
+        }
+    }
+    function handleBatchError(msg) {
+        toast('Batch error: ' + msg, 4000);
+        /* Advance queue so a single failure doesn't deadlock the whole batch */
+        state.batchResults.push({ name: state.loadedFileName || 'unknown', error: msg });
         setTimeout(processBatchNext, 80);
     }
-    function handleBatchError(msg) { toast('Batch error: '+msg); }
     function updateBatchProgress(pct) { const b=$('batchProgressBar'); if(b) b.style.width=pct+'%'; }
 
     function finishBatch() {
@@ -1068,11 +1084,17 @@
         new ResizeObserver(()=>{
             clearTimeout(containerResizeTimer);
             containerResizeTimer = setTimeout(()=>{
-                if (state.processedImageData&&state.processedImageW) {
-                    ctx.putImageData(
-                        new ImageData(new Uint8ClampedArray(state.processedImageData),
-                                      state.processedImageW,state.processedImageH),0,0);
-                    applyOverlays();
+                if (state.processedImageData && state.processedImageW) {
+                    /* Redraw whichever data is currently on display */
+                    if (state.splitView && state.originalResizedData) {
+                        _redrawSplitView();
+                    } else {
+                        ctx.putImageData(
+                            new ImageData(new Uint8ClampedArray(state.processedImageData),
+                                          state.processedImageW, state.processedImageH), 0, 0);
+                        applyOverlays();
+                    }
+                    drawHistogram();
                 }
             }, 150);
         }).observe(container);
@@ -1980,7 +2002,7 @@
             const mat = $('simpleMaterial').value;
 
             simpleStatus.style.color = 'var(--amber)';
-            simpleStatus.textContent = '[spin] Applying settings...';
+            simpleStatus.textContent = '⏳ Applying settings...';
             simpleGoBtn.disabled = true;
 
             $('imgWidth').value  = w;
@@ -1993,7 +2015,7 @@
             $('chkLanczos').checked = true;
 
             simpleStatus.style.color = 'var(--amber)';
-            simpleStatus.textContent = '[spin] Processing...';
+            simpleStatus.textContent = '⏳ Processing...';
 
             /* materialSelect.dispatchEvent('change') above already calls queueProcess().
                Do NOT call it again  -  that causes two pipeline runs.
@@ -2068,13 +2090,13 @@
             bar.style.cssText = 'display:flex;gap:16px;margin-top:16px;';
 
             const btnSnap = document.createElement('button');
-            btnSnap.textContent = 'Capture Capture';
+            btnSnap.textContent = '📷 Capture';
             btnSnap.className = 'btn primary';
             btnSnap.setAttribute('aria-label', 'Capture photo');
             btnSnap.style.cssText = 'padding:12px 28px;font-size:1rem;';
 
             const btnClose = document.createElement('button');
-            btnClose.textContent = 'x Cancel';
+            btnClose.textContent = '✕ Cancel';
             btnClose.className = 'btn';
             btnClose.setAttribute('aria-label', 'Close camera');
             btnClose.style.cssText = 'padding:12px 20px;font-size:1rem;';
@@ -2126,8 +2148,9 @@
             container.appendChild(scanOverlay);
         }
         const oCtx = scanOverlay.getContext('2d');
-        scanOverlay.width  = container.clientWidth;
-        scanOverlay.height = container.clientHeight;
+        /* Always sync canvas size to current container dimensions */
+        scanOverlay.width  = container.clientWidth  || 300;
+        scanOverlay.height = container.clientHeight || 300;
 
         const totalH   = scanOverlay.height;
         const totalW   = scanOverlay.width;
@@ -2269,17 +2292,21 @@
         }
     });
 
-    $('imgWidth').addEventListener('change', (e) => {
+    function onWidthChange(e) {
         if ($('lockRatio').checked && state.ratio)
             $('imgHeight').value = Math.round(e.target.value / state.ratio);
         updateEstimation(); queueProcess();
-    });
-    $('imgHeight').addEventListener('change', (e) => {
+    }
+    function onHeightChange(e) {
         if ($('lockRatio').checked && state.ratio)
             $('imgWidth').value = Math.round(e.target.value * state.ratio);
         updateEstimation(); queueProcess();
-    });
-    $('imgDpi').addEventListener('change', () => { updateEstimation(); queueProcess(); });
+    }
+    $('imgWidth').addEventListener('change', onWidthChange);
+    $('imgWidth').addEventListener('input',  onWidthChange);
+    $('imgHeight').addEventListener('change', onHeightChange);
+    $('imgHeight').addEventListener('input',  onHeightChange);
+    $('imgDpiNum').addEventListener('change', () => { updateEstimation(); queueProcess(); });
 
     fileInput.addEventListener('change', (e) => loadImageFile(e.target.files[0]));
 
@@ -2340,7 +2367,6 @@
     exportBtn.addEventListener('click', () => {
         if (!state.image) { toast('Import an image first'); return; }
         exportCleanPng('GG_LaserPrep_Export.png');
-        toast('PNG exported');
         clearPending();
     });
 
@@ -2762,7 +2788,7 @@
         /* -- Shared trace runner -- */
         function runTrace() {
             const g=getGrayData();
-            if(!g){ vtStatus.textContent='[!] No image loaded'; return null; }
+            if(!g){ vtStatus.textContent='⚠ No image loaded'; return null; }
             const threshold=parseInt(vtThresh.value)||128;
             const invert   =$('vtInvert').checked;
             const mode     =$('vtMode').value;
@@ -2773,7 +2799,7 @@
             const gray=new Uint8Array(g.w*g.h);
             for(let i=0;i<g.w*g.h;i++) gray[i]=invert?255-g.data[i*4]:g.data[i*4];
 
-            vtStatus.textContent='[spin] Tracing...';
+            vtStatus.textContent='⏳ Tracing...';
             let paths;
             if(mode==='centerline'){
                 paths=centerlineTrace(gray,g.w,g.h,threshold);
@@ -2841,7 +2867,7 @@
             }
 
             const beforeCount = paths.length;
-            vtStatus.textContent=`OK ${paths.length} paths found${optimise ? ' (optimised)' : ''}`;
+            vtStatus.textContent=`✓ ${paths.length} paths found${optimise ? ' (optimised)' : ''}`;
             return { paths, w:g.w, h:g.h, smooth };
         }
 
@@ -2916,7 +2942,7 @@
         btn.addEventListener('click', async ()=>{
             if(!state.image){ toast('Import an image first'); return; }
             btn.disabled=true;
-            btn.textContent='[spin] Removing...';
+            btn.textContent='⏳ Removing...';
 
             try {
                 const lib=await loadLib();
@@ -2951,7 +2977,7 @@
                     state.image._ggId=++state.imageIdCounter;
                     state.lanczosCache={imageId:null,pxW:0,pxH:0,data:null};
                     toast('OK Background removed!');
-                    btn.disabled=false; btn.textContent='Remove BG (AI) Remove BG (AI)';
+                    btn.disabled=false; btn.textContent='🪄 Remove BG';
                     queueProcess();
                 };
                 img.onerror=()=>{ URL.revokeObjectURL(url); throw new Error('Result decode failed'); };
@@ -2990,7 +3016,7 @@
                     state.image._ggId=++state.imageIdCounter;
                     state.lanczosCache={imageId:null,pxW:0,pxH:0,data:null};
                     toast('OK BG removed (threshold mode)');
-                    btn.disabled=false; btn.textContent='Remove BG (AI) Remove BG (AI)';
+                    btn.disabled=false; btn.textContent='🪄 Remove BG';
                     queueProcess();
                 };
                 img.src=url;
@@ -3033,9 +3059,9 @@
         /* -- Core G-code generator -- */
         function generateGcode(preview) {
             if(!state.processedImageData||!state.processedImageW){
-                gcStatus.textContent='[!] No processed image'; return null;
+                gcStatus.textContent='⚠ No processed image'; return null;
             }
-            gcStatus.textContent='[spin] Generating G-code...';
+            gcStatus.textContent='⏳ Generating G-code...';
             const w       = state.processedImageW;
             const h       = state.processedImageH;
             const data    = state.processedImageData;
@@ -3141,7 +3167,7 @@
             }
             lines.push('; END');
 
-            gcStatus.textContent=`OK ${lines.length} lines, ~${(lines.join('\n').length/1024).toFixed(1)}KB`;
+            gcStatus.textContent=`✓ ${lines.length} lines, ~${(lines.join('\n').length/1024).toFixed(1)}KB`;
             return lines.join('\n');
         }
 
